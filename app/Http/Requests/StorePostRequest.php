@@ -19,7 +19,6 @@ class StorePostRequest extends FormRequest
         $translations = $this->input('translations', []);
         
         foreach ($translations as $lang => $data) {
-            // Eğer slug boş veya yoks benzersiz slug üret
             if (empty($data['slug']) && !empty($data['title'])) {
                 $translations[$lang]['slug'] = $this->generateUniqueSlug($data['title'], $lang);
             }
@@ -28,19 +27,16 @@ class StorePostRequest extends FormRequest
         $this->merge(['translations' => $translations]);
     }
 
-    // Benzersiz slug üret
     private function generateUniqueSlug(string $title, string $language, ?int $ignorePostId = null): string
     {
         $slug = Str::slug($title);
         $originalSlug = $slug;
         $counter = 1;
         
-        // Slug mevcut mu kontrol et, varsa sonuna sayı ekle
         while ($this->slugExists($slug, $language, $ignorePostId)) {
             $slug = $originalSlug . '-' . $counter;
             $counter++;
             
-            // Sonsuz döngüye girmesin diye güvenlik
             if ($counter > 100) {
                 $slug = $originalSlug . '-' . time();
                 break;
@@ -50,7 +46,6 @@ class StorePostRequest extends FormRequest
         return $slug;
     }
     
-    // Slug'ın var olup olmadığını kontrol et
 
     private function slugExists(string $slug, string $language, ?int $ignorePostId = null): bool
     {

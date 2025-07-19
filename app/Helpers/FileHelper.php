@@ -2,25 +2,25 @@
 
 if (!function_exists('generateUniqueFilePath')) {
     /**
-     * Benzersiz bir dosya yolu oluşturur.
+     * Generates a unique file path.
      *
-     * @param string $folderPath   Kaydedilecek klasör (örn: 'uploads/images')
-     * @param string $fileName     Dosya adı (örn: 'photo')
-     * @param string $extension    Dosya uzantısı (örn: 'webp')
-     * @return string              Tam dosya yolu (örn: '/var/www/public/uploads/images/photo_1.webp')
+     * @param string $folderPath  The folder to save to (e.g., 'uploads/images')
+     * @param string $fileName    The file name (e.g., 'photo')
+     * @param string $extension   The file extension (e.g., 'webp')
+     * @return string             The full file path (e.g., '/var/www/public/uploads/images/photo_1.webp')
      */
     function generateUniqueFilePath($folderPath, $fileName, $extension)
     {
-        // Klasör yoksa oluştur
+        // Create the folder if it doesn't exist
         if (!file_exists($folderPath)) {
             mkdir($folderPath, 0777, true);
         }
 
-        // İlk kontrol için tam yol
+        // Full path for the initial check
         $baseName = $fileName . '.' . $extension;
         $fullPath = $folderPath . DIRECTORY_SEPARATOR . $baseName;
 
-        // Dosya adı çakışıyorsa sayı ekle
+        // If the file name conflicts, add a number
         $counter = 1;
         while (file_exists($fullPath)) {
             $newName = $fileName . '_' . $counter;

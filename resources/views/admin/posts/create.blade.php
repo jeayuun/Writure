@@ -15,26 +15,26 @@
         <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
-            <!-- Genel Bilgiler Bölümü -->
+            <!-- General Information Section -->
             <div class="bg-white p-6 shadow rounded-lg space-y-4">
-                <h2 class="text-xl font-semibold mb-4">Genel Bilgiler</h2>
+                <h2 class="text-xl font-semibold mb-4">{{ __('General Information') }}</h2>
 
-                <!-- Kategori Seçimi -->
+                <!-- Category Selection -->
                 <div class="space-y-2">
-                    <label class="block text-gray-700">Kategori:</label>
+                    <label class="block text-gray-700">{{ __('Category') }}:</label>
                     <select name="category_id" class="border rounded-lg w-full px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                        <option value="">Seçiniz</option>
+                        <option value="">{{ __('Select a category') }}</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">
-                                {{ $category->translations->where('language_slug', 'tr')->first()?->name }}
+                                {{ $category->translations->where('language_slug', app()->getLocale())->first()?->name ?? $category->translations->first()?->name }}
                             </option>
                         @endforeach
                     </select>
                 </div>
 
-                <!-- Etiketler -->
+                <!-- Tags -->
                 <div class="space-y-2">
-                    <label class="block text-gray-700">Etiketler:</label>
+                    <label class="block text-gray-700">{{ __('Tags') }}:</label>
                     <div class="flex flex-wrap gap-2 border rounded-lg p-2">
                         @foreach ($tags as $tag)
                             <label
@@ -42,15 +42,15 @@
                                 <input type="checkbox" name="tags[]" value="{{ $tag->id }}"
                                     class="rounded text-blue-600 focus:ring-blue-500">
                                 <span
-                                    class="text-sm text-gray-700">{{ $tag->translations->where('language_slug', 'tr')->first()?->name }}</span>
+                                    class="text-sm text-gray-700">{{ $tag->translations->where('language_slug', app()->getLocale())->first()?->name ?? $tag->translations->first()?->name }}</span>
                             </label>
                         @endforeach
                     </div>
                 </div>
 
-                <!-- Kapak Fotoğrafı -->
+                <!-- Cover Image -->
                 <div class="space-y-2">
-                    <label class="block text-gray-700">Kapak Fotoğrafı:</label>
+                    <label class="block text-gray-700">{{ __('Cover Image') }}:</label>
                     <div class="flex items-center space-x-4">
                         <div class="relative group">
                             <img src="" class="h-32 w-32 object-cover rounded-lg shadow hidden" id="cover-preview">
@@ -67,30 +67,30 @@
                     </div>
                 </div>
 
-                <!-- Galeri Fotoğrafları -->
+                <!-- Gallery Photos -->
                 <div class="space-y-2">
-                    <label class="block text-gray-700">Galeri Fotoğrafları:</label>
+                    <label class="block text-gray-700">{{ __('Gallery Photos') }}:</label>
                     <div class="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer" id="gallery-dropzone"
                         ondragover="event.preventDefault(); this.classList.add('border-blue-500')"
                         ondragleave="this.classList.remove('border-blue-500')" ondrop="handleDrop(event)">
-                        <p class="text-gray-500 mb-2">Dosyaları sürükleyip bırakın veya tıklayın</p>
+                        <p class="text-gray-500 mb-2">{{ __('Drag and drop files or click to upload') }}</p>
                         <input type="file" name="gallery_images[]" multiple class="hidden" id="gallery-input"
                             onchange="previewGallery(event)">
                         <button type="button" onclick="document.getElementById('gallery-input').click()"
                             class="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-200 transition">
-                            Dosya Seç
+                            {{ __('Select Files') }}
                         </button>
                     </div>
 
-                    <!-- Galeri Önizleme -->
+                    <!-- Gallery Preview -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4" id="gallery-preview">
-                        <!-- Yeni yüklenen resimler burada gösterilecek -->
+                        <!-- New uploaded images will be shown here -->
                     </div>
                 </div>
 
-                <!-- Diğer Alanlar -->
+                <!-- Other Fields -->
                 <div class="space-y-2">
-                    <label class="block text-gray-700">Sıralama:</label>
+                    <label class="block text-gray-700">{{ __('Order') }}:</label>
                     <input type="number" name="order" value="{{ old('order') }}"
                         class="border rounded-lg w-full px-3 py-2 focus:ring-2 focus:ring-blue-500">
                 </div>
@@ -99,87 +99,87 @@
                     <label class="inline-flex items-center space-x-2">
                         <input type="checkbox" name="is_featured" value="1"
                             class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">Öne Çıkar</span>
+                        <span class="text-gray-700">{{ __('Is Featured') }}</span>
                     </label>
 
                     <label class="inline-flex items-center space-x-2">
                         <input type="checkbox" name="comment_enabled" value="1" checked
                             class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700">Yorum Açık</span>
+                        <span class="text-gray-700">{{ __('Comments Enabled') }}</span>
                     </label>
                 </div>
 
                 <div class="space-y-2">
-                    <label class="block text-gray-700">Durum:</label>
+                    <label class="block text-gray-700">{{ __('Status') }}:</label>
                     <select name="status" class="border rounded-lg w-full px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                        <option value="draft">Taslak</option>
-                        <option value="published">Yayınlandı</option>
+                        <option value="draft">{{ __('Draft') }}</option>
+                        <option value="published">{{ __('Published') }}</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Çoklu Dil İçeriği Bölümü -->
+            <!-- Multi-Language Content Section -->
             <div class="bg-white p-6 shadow rounded-lg space-y-4">
-                <h2 class="text-xl font-semibold mb-4">Çoklu Dil İçeriği</h2>
+                <h2 class="text-xl font-semibold mb-4">{{ __('Multi-Language Content') }}</h2>
 
                 @foreach ($languages as $lang)
                     @if ($lang->is_default === 1)
                         <div class="border border-gray-200 rounded-lg p-4 space-y-3 bg-gray-50">
                             <h3 class="text-lg font-semibold text-gray-700">{{ strtoupper($lang->name) }}</h3>
 
-                            <!-- Başlık -->
+                            <!-- Title -->
                             <div class="space-y-1">
-                                <label class="block text-gray-700">Başlık:</label>
+                                <label class="block text-gray-700">{{ __('Title') }}:</label>
                                 <input type="text" name="translations[{{ $lang->slug }}][title]"
                                     class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Başlık girin" required>
+                                    placeholder="{{ __('Enter title') }}" required>
                             </div>
 
                             <!-- Slug -->
                             <div class="space-y-1">
-                                <label class="block text-gray-700">Slug:</label>
+                                <label class="block text-gray-700">{{ __('Slug') }}:</label>
                                 <input type="text" name="translations[{{ $lang->slug }}][slug]"
                                     class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                                    placeholder="SEO dostu URL" required>
+                                    placeholder="{{ __('SEO-friendly URL') }}" required>
                             </div>
 
-                            <!-- Kısa Açıklama -->
+                            <!-- Short Description -->
                             <div class="space-y-1">
-                                <label class="block text-gray-700">Kısa Açıklama:</label>
+                                <label class="block text-gray-700">{{ __('Short Description') }}:</label>
                                 <textarea name="translations[{{ $lang->slug }}][short_description]"
                                     class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" rows="3"
-                                    placeholder="Özet bilgi"></textarea>
+                                    placeholder="{{ __('Summary information') }}"></textarea>
                             </div>
 
-                            <!-- İçerik -->
+                            <!-- Content -->
                             <div class="space-y-1">
-                                <label class="block text-gray-700">İçerik:</label>
+                                <label class="block text-gray-700">{{ __('Content') }}:</label>
                                 <textarea name="translations[{{ $lang->slug }}][content]"
                                     class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" rows="6"
-                                    placeholder="Detaylı içerik" id="content" spellcheck="false" autocomplete="off"></textarea>
+                                    placeholder="{{ __('Detailed content') }}" id="content" spellcheck="false" autocomplete="off"></textarea>
                             </div>
 
-                            <!-- SEO Alanları -->
+                            <!-- SEO Fields -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div class="space-y-1">
-                                    <label class="block text-gray-700">SEO Başlık:</label>
+                                    <label class="block text-gray-700">{{ __('SEO Title') }}:</label>
                                     <input type="text" name="translations[{{ $lang->slug }}][seo_title]"
                                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Meta title">
+                                        placeholder="{{ __('Meta title') }}">
                                 </div>
 
                                 <div class="space-y-1">
-                                    <label class="block text-gray-700">SEO Açıklama:</label>
+                                    <label class="block text-gray-700">{{ __('SEO Description') }}:</label>
                                     <input type="text" name="translations[{{ $lang->slug }}][seo_description]"
                                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Meta description">
+                                        placeholder="{{ __('Meta description') }}">
                                 </div>
 
                                 <div class="space-y-1">
-                                    <label class="block text-gray-700">SEO Anahtar Kelimeler:</label>
+                                    <label class="block text-gray-700">{{ __('SEO Keywords') }}:</label>
                                     <input type="text" name="translations[{{ $lang->slug }}][seo_keywords]"
                                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Meta keywords">
+                                        placeholder="{{ __('Meta keywords') }}">
                                 </div>
                             </div>
                         </div>
@@ -187,10 +187,10 @@
                 @endforeach
             </div>
 
-            <!-- Gönder Butonu -->
+            <!-- Submit Button -->
             <button type="submit"
                 class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full md:w-auto">
-                Kaydet
+                {{ __('Save') }}
             </button>
         </form>
     </div>
@@ -213,12 +213,12 @@
                 ]
             });
 
-            // Kapak Fotoğrafı Önizleme
+            // Cover Image Preview
             function previewCover(event) {
                 const reader = new FileReader();
                 reader.onload = function() {
                     const preview = document.getElementById('cover-preview');
-                    const removeBtn = preview.previousElementSibling;
+                    const removeBtn = preview.nextElementSibling;
                     if (preview) {
                         preview.src = reader.result;
                         preview.classList.remove('hidden');
@@ -230,7 +230,7 @@
                 }
             }
 
-            // Galeri Yönetimi
+            // Gallery Management
             function previewGallery(event) {
                 const files = event.target.files;
                 const previewContainer = document.getElementById('gallery-preview');
@@ -241,22 +241,22 @@
                         const div = document.createElement('div');
                         div.className = 'relative group';
                         div.innerHTML = `
-                    <img src="${e.target.result}" class="w-full h-32 object-cover rounded-lg shadow">
-                    <button 
-                        type="button" 
-                        onclick="this.parentElement.remove()" 
-                        class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                    >
-                        ✕
-                    </button>
-                `;
+                        <img src="${e.target.result}" class="w-full h-32 object-cover rounded-lg shadow">
+                        <button 
+                            type="button" 
+                            onclick="this.parentElement.remove()" 
+                            class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
+                        >
+                            ✕
+                        </button>
+                    `;
                         previewContainer.appendChild(div);
                     };
                     reader.readAsDataURL(file);
                 }
             }
 
-            // Sürükle-Bırak İşlevselliği
+            // Drag-and-Drop Functionality
             function handleDrop(e) {
                 e.preventDefault();
                 e.target.classList.remove('border-blue-500');
@@ -268,7 +268,7 @@
                 });
             }
 
-            // Sıralama için Sortable.js
+            // Sortable.js for ordering
             document.addEventListener('DOMContentLoaded', function() {
                 const galleryPreview = document.getElementById('gallery-preview');
 
@@ -280,8 +280,6 @@
             });
         </script>
     @endpush
-
-
 
     @push('styles')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -302,4 +300,4 @@
             }
         </style>
     @endpush
-    @endsection
+@endsection

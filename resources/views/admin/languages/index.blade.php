@@ -3,10 +3,10 @@
 @section('content')
     <div class="max-w-6xl mx-auto mt-10">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold">Dil Listesi</h2>
+            <h2 class="text-2xl font-semibold">{{ __('Language List') }}</h2>
             <a href="{{ route('languages.create') }}"
                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-                + Yeni Dil Ekle
+                + {{ __('Add New Language') }}
             </a>
         </div>
 
@@ -15,12 +15,12 @@
                 <thead class="bg-gray-100 text-gray-700 text-sm">
                     <tr>
                         <th class="px-4 py-2 text-left">ID</th>
-                        <th class="px-4 py-2 text-left">Ad</th>
-                        <th class="px-4 py-2 text-left">Slug</th>
-                        <th class="px-4 py-2 text-left">Bayrak</th>
-                        <th class="px-4 py-2 text-center">Ana Dil</th>
-                        <th class="px-4 py-2 text-center">Aktif</th>
-                        <th class="px-4 py-2 text-center">İşlemler</th>
+                        <th class="px-4 py-2 text-left">{{ __('Name') }}</th>
+                        <th class="px-4 py-2 text-left">{{ __('Slug') }}</th>
+                        <th class="px-4 py-2 text-left">{{ __('Flag') }}</th>
+                        <th class="px-4 py-2 text-center">{{ __('Default') }}</th>
+                        <th class="px-4 py-2 text-center">{{ __('Active') }}</th>
+                        <th class="px-4 py-2 text-center">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-sm">
@@ -34,15 +34,15 @@
                             <td class="px-4 py-2 text-center">{{ $language->status ? '✔️' : '❌' }}</td>
                             <td class="px-4 py-2 text-center space-x-2">
                                 <a href="{{ route('languages.edit', $language->id) }}"
-                                   class="text-blue-600 hover:underline">Düzenle</a>
+                                   class="text-blue-600 hover:underline">{{ __('Edit') }}</a>
 
                                 <form action="{{ route('languages.destroy', $language->id) }}"
                                       method="POST"
                                       class="inline-block"
-                                      onsubmit="return confirm('Silmek istediğine emin misin?')">
+                                      onsubmit="return confirm('{{ __('Are you sure you want to delete this item?') }}')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:underline">Sil</button>
+                                    <button type="submit" class="text-red-600 hover:underline">{{ __('Delete') }}</button>
                                 </form>
                             </td>
                         </tr>
@@ -50,7 +50,7 @@
 
                     @if($languages->isEmpty())
                         <tr>
-                            <td colspan="7" class="text-center px-4 py-6 text-gray-500">Kayıtlı dil bulunamadı.</td>
+                            <td colspan="7" class="text-center px-4 py-6 text-gray-500">{{ __('No languages found.') }}</td>
                         </tr>
                     @endif
                 </tbody>

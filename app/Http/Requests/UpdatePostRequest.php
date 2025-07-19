@@ -20,7 +20,6 @@ class UpdatePostRequest extends FormRequest
         $postId = $this->getPostId();
         
         foreach ($translations as $lang => $data) {
-            // Eğer slug boş veya yoksa, benzersiz slug üret
             if (empty($data['slug']) && !empty($data['title'])) {
                 $translations[$lang]['slug'] = $this->generateUniqueSlug($data['title'], $lang, $postId);
             }
@@ -29,7 +28,6 @@ class UpdatePostRequest extends FormRequest
         $this->merge(['translations' => $translations]);
     }
 
-    //Route'tan post ID'sini al
     private function getPostId()
     {
         $postId = $this->route('id') ?? $this->route('post');
@@ -41,19 +39,16 @@ class UpdatePostRequest extends FormRequest
         return $postId;
     }
 
-    //Benzersiz slug üret
     private function generateUniqueSlug(string $title, string $language, ?int $ignorePostId = null): string
     {
         $slug = Str::slug($title);
         $originalSlug = $slug;
         $counter = 1;
         
-        // Slug mevcut mu kontrol et, varsa sonuna sayı ekle
         while ($this->slugExists($slug, $language, $ignorePostId)) {
             $slug = $originalSlug . '-' . $counter;
             $counter++;
             
-            // Sonsuz döngüye girmesin diye güvenlik
             if ($counter > 100) {
                 $slug = $originalSlug . '-' . time(); // Zaman damgası ekle
                 break;
@@ -63,7 +58,6 @@ class UpdatePostRequest extends FormRequest
         return $slug;
     }
     
-    //Slug'ın var olup olmadığını kontrol et
     private function slugExists(string $slug, string $language, ?int $ignorePostId = null): bool
     {
         $query = DB::table('post_translations')

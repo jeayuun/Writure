@@ -19,7 +19,7 @@ class PostController extends Controller
     public function index()
     {
         $languages = Language::all();
-        $langSlug = Language::where('is_default', 1)->first()?->slug ?? 'tr';
+        $langSlug = Language::where('is_default', 1)->first()?->slug ?? 'en';
 
         $posts = Post::query()
             ->select([
@@ -35,7 +35,6 @@ class PostController extends Controller
             ->latest()
             ->paginate(10);
 
-        // $posts = Post::with(['translations', 'category.translations', 'tags.translations'])->latest()->paginate(20);
         return view('admin.posts.index', compact('posts', 'langSlug', 'languages'));
     }
 
@@ -64,16 +63,15 @@ class PostController extends Controller
                 $file = $request->file('cover_image');
                 $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
-                // Benzersiz path oluştur
                 $uniqueFullPath = generateUniqueFilePath(public_path('uploads/posts'), $originalName, 'webp');
 
-                // public_path kısmını kırp, sadece 'uploads/posts/...' haline getir
+                // Trim the public_path part to get the relative path like 'uploads/posts/...'
                 $relativePath = str_replace(public_path() . DIRECTORY_SEPARATOR, '', $uniqueFullPath);
 
-                // WebP formatına dönüştür
+                // Convert to WebP format
                 convertToWebP($file, $relativePath);
 
-                // Veritabanı için yolu kaydet
+                // Save the path for the database
                 $post->cover_image = $relativePath;
             }
 
@@ -81,13 +79,13 @@ class PostController extends Controller
                 $existingImages = $post->gallery_images ?? [];
 
                 foreach ($request->file('gallery_images') as $file) {
-                    $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);  // 'photo'
+                    $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                     $uniqueFullPath = generateUniqueFilePath(public_path('uploads/gallery'), $originalName, 'webp');
 
-                    // Tam path'ten sadece alt yolu alalım (public_path() kısmını çıkaralım)
+                    // Get just the subpath from the full path (remove the public_path() part)
                     $relativePath = str_replace(public_path() . DIRECTORY_SEPARATOR, '', $uniqueFullPath);
 
-                    // WebP'ye dönüştür
+                    // Convert to WebP
                     convertToWebP($file, $relativePath);
 
                     $existingImages[] = $relativePath;
@@ -116,31 +114,28 @@ class PostController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('posts.index')->with('success', 'Blog başarıyla eklendi.');
+            return redirect()->route('posts.index')->with('success', 'Blog post created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Hata oluştu: ' . $e->getMessage());
+            return back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
 
     public function update(UpdatePostRequest $request, $id)
     {
-        ;
-
         $post = Post::findOrFail($id);
         DB::beginTransaction();
 
         try {
-            $post = Post::findOrFail($id);
             $post->category_id = $request->category_id;
             $post->order = $request->order ?? 0;
             $post->is_featured = $request->boolean('is_featured');
             $post->comment_enabled = $request->boolean('comment_enabled');
             $post->status = $request->status ?? 'draft';
 
-            // Cover image işlemleri...
+            // Cover image operations...
             if ($request->hasFile('cover_image')) {
-                // Önce varsa eski görseli sil
+                // First, delete the old image if it exists
                 if ($post->cover_image && file_exists(public_path($post->cover_image))) {
                     @unlink(public_path($post->cover_image));
                 }
@@ -156,7 +151,7 @@ class PostController extends Controller
                 $post->cover_image = $relativePath;
             }
 
-            // Gallery images işlemleri...
+            // Gallery images operations...
             if ($request->hasFile('gallery_images')) {
                 $existingImages = $post->gallery_images ?? [];
 
@@ -176,8 +171,7 @@ class PostController extends Controller
 
             $post->save();
 
-            // Translation işlemleri
-
+            // Translation operations
             foreach ($request->translations as $lang => $data) {
                 $translation = $post->translations()->where('language_slug', $lang)->first();
 
@@ -209,10 +203,10 @@ class PostController extends Controller
 
             DB::commit();
 
-            return redirect()->route('posts.index')->with('success', 'Blog başarıyla güncellendi.');
+            return redirect()->route('posts.index')->with('success', 'Blog post updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Güncelleme işlemi başarısız: ' . $e->getMessage());
+            return back()->with('error', 'Update failed: ' . $e->getMessage());
         }
     }
 
@@ -243,13 +237,12 @@ class PostController extends Controller
         $post->status = $request->status;
         $post->save();
 
-        return redirect()->back()->with('success', 'Status başarıyla güncellendi');
+        return redirect()->back()->with('success', 'Status updated successfully');
     }
 
     public function removeGalleryImage(Request $request, $id)
     {
         $post = Post::findOrFail($id);
-
         $imagePath = $request->input('image');
 
         if ($imagePath && file_exists(public_path($imagePath))) {
@@ -274,7 +267,6 @@ class PostController extends Controller
 
         if (!empty($order)) {
             $currentImages = $post->gallery_images ?? [];
-
             $sortedImages = array_filter($order, function ($img) use ($currentImages) {
                 return in_array($img, $currentImages);
             });
@@ -289,37 +281,6 @@ class PostController extends Controller
 
         return response()->json(['success' => false]);
     }
-
-    // private function convertToWebP($imageFile, $destinationPath, $quality = 70)
-    // {
-    //     $imageType = $imageFile->getClientMimeType();
-    //     $imageResource = null;
-
-    //     if ($imageType == 'image/jpeg' || $imageType == 'image/jpg') {
-    //         $imageResource = imagecreatefromjpeg($imageFile->getPathname());
-    //     } elseif ($imageType == 'image/png') {
-    //         $imageResource = imagecreatefrompng($imageFile->getPathname());
-    //         imagepalettetotruecolor($imageResource);
-    //     } elseif ($imageType == 'image/gif') {
-    //         $imageResource = imagecreatefromgif($imageFile->getPathname());
-    //     } elseif ($imageType == 'image/webp') {
-    //         $imageResource = imagecreatefromwebp($imageFile->getPathname());
-    //     }
-
-    //     if (!$imageResource) {
-    //         throw new \Exception('Desteklenmeyen resim formatı');
-    //     }
-
-    //     $fullPath = public_path($destinationPath);
-    //     $folderPath = dirname($fullPath);
-
-    //     if (!file_exists($folderPath)) {
-    //         mkdir($folderPath, 0777, true);
-    //     }
-
-    //     imagewebp($imageResource, $fullPath, $quality);
-    //     imagedestroy($imageResource);
-    // }
 
     private function deletePostAndAssets(Post $post): void
     {
@@ -346,53 +307,53 @@ class PostController extends Controller
             $post = Post::findOrFail($id);
             $post->translations()->delete();
             $this->deletePostAndAssets($post);
-            return redirect()->route('posts.index')->with('success', 'Blog başarıyla silindi.');
+            return redirect()->route('posts.index')->with('success', 'Blog post deleted successfully.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Silme işlemi başarısız: ' . $e->getMessage());
+            return back()->with('error', 'Delete failed: ' . $e->getMessage());
         }
     }
 
-public function destroyTranslation($postId, $translationId)
-{
-    DB::beginTransaction();
-    try {
-        $translation = PostTranslation::findOrFail($translationId);
-        $post = $translation->post; // Post'u buradan alıyoruz
-        
-        // Önce çeviriyi siliyoruz
-        $translation->delete();
+    public function destroyTranslation($postId, $translationId)
+    {
+        DB::beginTransaction();
+        try {
+            $translation = PostTranslation::findOrFail($translationId);
+            $post = $translation->post; // Get the post from the translation
 
-        // Kalan çeviri sayısını kontrol ediyoruz
-        $remainingTranslations = $post->translations()->count();
+            // First, delete the translation
+            $translation->delete();
 
-        // Eğer hiç çeviri kalmadıysa
-        if ($remainingTranslations === 0) {
-            $this->deletePostAndAssets($post);
-            
+            // Check the number of remaining translations
+            $remainingTranslations = $post->translations()->count();
+
+            // If no translations are left
+            if ($remainingTranslations === 0) {
+                $this->deletePostAndAssets($post);
+                
+                DB::commit();
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'The blog post was also deleted because the last translation was removed.',
+                    'redirect' => route('posts.index')
+                ]);
+            }
+
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
-                'message' => 'Son çeviri silindiği için blog yazısı da silindi',
-                'redirect' => route('posts.index')
+                'message' => 'Translation deleted successfully.',
+                'reload' => true
             ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error deleting translation: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while deleting the translation: ' . $e->getMessage()
+            ], 500);
         }
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Çeviri başarıyla silindi',
-            'reload' => true
-        ]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Çeviri silinirken hata: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Çeviri silinirken bir hata oluştu: ' . $e->getMessage()
-        ], 500);
     }
-}
 }

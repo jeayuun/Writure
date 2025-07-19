@@ -10,7 +10,7 @@ if (! function_exists('convertToWebP')) {
         $allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 
         if (! in_array($mime, $allowedMimes)) {
-            throw new \Exception('Desteklenmeyen resim formatı: ' . $mime);
+            throw new \Exception('Unsupported image format: ' . $mime);
         }
 
         $fullPath   = public_path($destinationPath);
@@ -20,7 +20,7 @@ if (! function_exists('convertToWebP')) {
             mkdir($folderPath, 0777, true);
         }
 
-        // Intervention ImageManager ile WebP'e dönüştürme
+        // Convert to WebP using Intervention ImageManager
         $manager = new ImageManager(new Driver());
         $manager->read($imageFile->getPathname())
             ->toWebp($quality)

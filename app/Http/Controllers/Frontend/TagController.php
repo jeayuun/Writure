@@ -18,7 +18,6 @@ class TagController extends BaseFrontendController
             $this->validateLanguage($lang);
         }
     
-        // Tag çevirisi
         $tagTranslation = TagTranslation::select('id', 'tag_id', 'language_slug', 'name', 'slug', 'seo_title', 'seo_description', 'seo_keywords')
             ->where('slug', $slug)
             ->where('language_slug', $lang)
@@ -26,10 +25,8 @@ class TagController extends BaseFrontendController
     
         $tagId = $tagTranslation->tag_id;
     
-        // Tag bilgisi
         $tag = Tag::findOrFail($tagId);
     
-        // Post sorgusu
         $posts = Post::select([
             'id',
             'category_id',
@@ -54,7 +51,6 @@ class TagController extends BaseFrontendController
         ->latest()
         ->paginate(10);
     
-        // Dil bilgileri
         $languages = Language::all();
         $currentLanguage = $languages->firstWhere('slug', $lang);
     

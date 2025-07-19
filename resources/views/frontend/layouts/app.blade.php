@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#3B82F6">
 
     {{-- SEO & Social Meta Tags --}}
-    <title>@yield('title', 'Çok Dilli Blog')</title>
+    <title>@yield('title', 'Laravel Mini Blog Application')</title>
     @yield('meta_tags')
 
     {{-- Alpine.js --}}
@@ -73,7 +73,21 @@
                         @endforeach
                     </div>
                 </div>
+                <div>
+                    @if (Route::has('login'))
+                        <div class="hidden sm:flex sm:items-center sm:ms-6">
+                            @auth
+                                <a href="{{ url('/dashboard') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Dashboard</a>
+                            @else
+                                <a href="{{ route('login') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Log in</a>
 
+                                @if (Route::has('register'))
+                                    <a href="{{ route('register') }}" class="ms-4 text-sm text-gray-700 dark:text-gray-500 underline">Register</a>
+                                @endif
+                            @endauth
+                        </div>
+                    @endif
+                </div>
             </div>
         </nav>
     </header>

@@ -46,7 +46,8 @@ class DummyContentSeeder extends Seeder
                 'name' => 'Admin User',
                 'email' => 'admin@example.com',
                 'email_verified_at' => Carbon::now(),
-                'password' => Hash::make('password'), // Default password is 'password'
+                'password' => Hash::make('password'),
+                'is_admin' => true, // This user is an admin
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ],
@@ -55,7 +56,8 @@ class DummyContentSeeder extends Seeder
                 'name' => 'Jane Doe',
                 'email' => 'jane.doe@example.com',
                 'email_verified_at' => Carbon::now(),
-                'password' => Hash::make('password'), // Default password is 'password'
+                'password' => Hash::make('password'),
+                'is_admin' => false, // This is a regular user
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ]

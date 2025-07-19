@@ -12,7 +12,9 @@ use App\Http\Controllers\Frontend\PostController as FrontendPostController;
 use App\Http\Controllers\Frontend\TagController as FrontendTagController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\UserDashboardController;
 use Illuminate\Support\Facades\Route;
+
 
 Route::get('/', [HomeController::class, 'index'])->name('frontend.home.withoutlang');
 Route::get('/translator/{lang}/{encodedPath}', [LanguageChangeController::class, 'switch'])->name('language.switch');
@@ -86,6 +88,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
 });
 
 require __DIR__ . '/auth.php';

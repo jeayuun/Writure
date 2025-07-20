@@ -15,7 +15,7 @@
         <!-- Quick Actions -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <!-- Create Post -->
-            <a href="#" class="group block bg-white p-6 rounded-lg shadow-md hover:shadow-lg hover:scale-105 transform transition-all duration-300">
+            <a href="{{ route('user.posts.create') }}" class="group block bg-white p-6 rounded-lg shadow-md hover:shadow-lg hover:scale-105 transform transition-all duration-300">
                 <div class="flex items-center">
                     <div class="bg-green-100 text-green-600 p-3 rounded-full">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>

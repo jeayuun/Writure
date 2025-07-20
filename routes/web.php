@@ -13,8 +13,10 @@ use App\Http\Controllers\Frontend\TagController as FrontendTagController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\User\PostController as UserPostController; // This line was missing
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 
 Route::get('/', [HomeController::class, 'index'])->name('frontend.home.withoutlang');
 Route::get('/translator/{lang}/{encodedPath}', [LanguageChangeController::class, 'switch'])->name('language.switch');
@@ -90,6 +92,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    Route::get('/user/posts/create', [UserPostController::class, 'create'])->name('user.posts.create');
+    Route::post('/user/posts', [UserPostController::class, 'store'])->name('user.posts.store');
 });
 
 require __DIR__ . '/auth.php';

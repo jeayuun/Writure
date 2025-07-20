@@ -19,4 +19,15 @@ class Tag extends Model
     {
         return $this->belongsToMany(Post::class, 'post_tag');
     }
+    
+    /**
+     * Get the translation for a given language code.
+     *
+     * @param string $languageCode
+     * @return \App\Models\TagTranslation|null
+     */
+    public function translate($languageCode)
+    {
+        return $this->translations()->where('language_slug', $languageCode)->first();
+    }
 }

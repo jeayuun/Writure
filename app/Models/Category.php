@@ -42,7 +42,6 @@ class Category extends Model
      */
     public function translate($languageCode)
     {
-        // Corrected to use 'lang' which matches the database schema for this table
-        return $this->translations()->where('lang', $languageCode)->first();
+        return $this->translations()->where('language_slug', $languageCode)->first();
     }
 }

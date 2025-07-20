@@ -19,8 +19,17 @@ class PostController extends Controller
      */
     public function create()
     {
-        $categories = Category::all();
-        $tags = Tag::all();
+        $lang = app()->getLocale();
+
+        // Eager load only the necessary translations
+        $categories = Category::with(['translations' => function ($query) use ($lang) {
+            $query->where('language_slug', $lang);
+        }])->get();
+
+        $tags = Tag::with(['translations' => function ($query) use ($lang) {
+            $query->where('language_slug', $lang);
+        }])->get();
+        
         // Return the new, correct view for the user
         return view('user.posts.create', compact('categories', 'tags'));
     }
@@ -34,7 +43,7 @@ class PostController extends Controller
     public function store(StorePostRequest $request)
     {
         $data = $request->all();
-        $data['user_id'] = Auth::id(); // Assign the post to the logged-in user
+        $data['user_id'] = Auth::id(); // Assi  gn the post to the logged-in user
 
         // Handle Cover Image Upload
         if ($request->hasFile('cover_image')) {
@@ -73,7 +82,7 @@ class PostController extends Controller
                 // Ensure translation data is not empty before creating
                 if (!empty($translationData['title'])) {
                     $post->translations()->create(
-                        $translationData + ['language_code' => $lang]
+                        $translationData + ['language_slug' => $lang]
                     );
                 }
             }

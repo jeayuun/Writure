@@ -22,7 +22,7 @@
                                     <select name="category_id" id="category_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-800 dark:border-gray-600">
                                         <option value="">Select a category</option>
                                         @foreach($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->translate($lang)->name ?? $category->name }}</option>
+                                            <option value="{{ $category->id }}">{{ $category->translations->first()->name ?? __('Untitled') }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -33,7 +33,7 @@
                                         @foreach($tags as $tag)
                                             <label class="inline-flex items-center mr-4">
                                                 <input type="checkbox" name="tags[]" value="{{ $tag->id }}" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800">
-                                                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ $tag->translate($lang)->name ?? $tag->name }}</span>
+                                                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ $tag->translations->first()->name ?? __('Untitled') }}</span>
                                             </label>
                                         @endforeach
                                     </div>

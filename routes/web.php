@@ -13,12 +13,13 @@ use App\Http\Controllers\Frontend\TagController as FrontendTagController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\UserDashboardController;
-use App\Http\Controllers\User\PostController as UserPostController; // This line was missing
+use App\Http\Controllers\User\PostController as UserPostController;
+use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 
-Route::get('/', [HomeController::class, 'index'])->name('frontend.home.withoutlang');
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::get('/translator/{lang}/{encodedPath}', [LanguageChangeController::class, 'switch'])->name('language.switch');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 

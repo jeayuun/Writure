@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>Explore Blogs | Write.</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -24,7 +24,7 @@
                     <!-- Logo -->
                     <div class="flex-shrink-0">
                         <a href="{{ route('frontend.home', ['lang' => $lang]) }}">
-                            <h1 class="text-white font-bold text-xl">Laravel Multi-Language Blog</h1>
+                            <h1 class="text-white font-bold text-xl" style="font-family: Merriweather,serif; font-size: 2.25rem; line-height: 2.5rem;">Write.</h1>
                         </a>
                     </div>
 
@@ -91,11 +91,11 @@
                                 </x-dropdown>
                             @else
                                 <a href="{{ route('login') }}"
-                                    class="font-semibold text-gray-400 hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">{{ __('Log in') }}</a>
+                                    class="font-semibold text-gray-400 hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">{{ __('Sign In') }}</a>
 
                                 @if (Route::has('register'))
                                     <a href="{{ route('register') }}"
-                                        class="ms-4 font-semibold text-gray-400 hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">{{ __('Register') }}</a>
+                                        class="ms-4 font-semibold text-gray-400 hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">{{ __('Start Writing') }}</a>
                                 @endif
                             @endauth
                         </div>

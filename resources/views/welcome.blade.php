@@ -18,7 +18,7 @@
 <body class="bg-white text-gray-800">
     <div class="container mx-auto px-6">
         <header class="flex justify-between items-center py-5" style="border-bottom: 1px solid #eaeaea;"> 
-            <div class="text-4xl font-serif">Wrytte</div>
+            <div class="text-4xl font-serif">Writure</div>
             <nav class="flex items-center space-x-8">
                 <a href="{{ route('login') }}" class="text-gray-700 hover:text-black transition">Sign In</a>
                 <a href="{{ route('register') }}" class="bg-black text-white px-6 py-3 rounded-full hover:bg-gray-800 transition">Start Writing</a>
@@ -29,8 +29,8 @@
             <section class="py-5">
                 <div class="grid md:grid-cols-2 gap-16 items-center">
                     <div class="space-y-8">
-                        <h1 class="text-7xl font-serif font-normal leading-tight" style="line-height: 1;">Everyone can write and read in Wrytte.</h1>
-                        <p class="text-gray-500 text-lg font-light">Easy and free to find and make great articles and connect with millions of people in Wrytte.</p>
+                        <h1 class="text-7xl font-serif font-normal leading-tight" style="line-height: 1;">Share Your Thoughts, Tell Your Story. Be a Writure.</h1>
+                        <p class="text-gray-500 text-lg font-light">Join a community of passionate writers and readers. Share your thoughts, create insightful blogs, and connect with people from around the world. Writure gives you the tools to express yourself, learn from others, and make your voice heard.</p>
                         <a href="{{ route('register') }}" class="bg-black text-white px-6 py-2 rounded-full inline-block hover:bg-gray-800 transition text-lg">Start Writing</a>
                     </div>
                     <div>
@@ -55,7 +55,7 @@
                             </div>
                         </div>
                     @empty
-                        <p class="text-center text-gray-500 md:col-span-3">No recommended articles found at the moment.</p>
+                        <p class="text-center text-gray-500 md:col-span-3">No recommended blogs found at the moment.</p>
                     @endforelse
                 </div>
             </section>
@@ -64,7 +64,7 @@
 
     <footer class="bg-black text-white">
         <div class="container mx-auto px-6 py-10 flex justify-between items-center">
-            <div class="text-4xl font-serif font-normal">Wrytte</div>
+            <div class="text-4xl font-serif font-normal">Writure</div>
             <nav class="flex space-x-8">
                 <a href="#" class="hover:text-gray-300 transition">About</a>
                 <a href="#" class="hover:text-gray-300 transition">Contact Us</a>

@@ -10,8 +10,8 @@
         <!-- Form Section -->
         <div class="flex flex-col justify-center items-center px-6 md:px-12 lg:px-24 py-12 min-h-screen">
             <div class="w-full max-w-md">
-                <a href="/" class="text-4xl font-serif font-normal text-gray-800">Wrytte</a>
-                <h2 class="text-3xl font-semibold text-gray-800 mt-10 mb-6">Sign Up and Join Wrytte</h2>
+                <a href="/" class="text-4xl font-serif font-normal text-gray-800">Writure</a>
+                <h2 class="text-3xl font-semibold text-gray-800 mt-10 mb-6">Sign Up and Join Writure</h2>
 
                 <form method="POST" action="{{ route('register') }}" id="register-form" class="space-y-6">
                     @csrf

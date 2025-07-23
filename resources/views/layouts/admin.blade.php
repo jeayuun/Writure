@@ -60,6 +60,12 @@
                    <span class="ml-4">{{ __('Dashboard') }}</span>
                 </a>
 
+                <a href="{{ route('users.index') }}"
+                   class="sidebar-link flex items-center px-8 py-3 transition hover:bg-gray-900 hover:text-white {{ $routePrefix == 'users' ? 'active' : '' }}">
+                   <i class="fas fa-language w-6 text-center"></i>
+                   <span class="ml-4">{{ __('Users') }}</span>
+                </a>
+
                 <!-- Blog Management Dropdown -->
                 <div x-data="{ open: {{ in_array($routePrefix, ['categories', 'tags', 'posts']) ? 'true' : 'false' }} }">
                     <button @click="open = !open"
@@ -100,13 +106,13 @@
         </aside>
 
         {{-- Content Area --}}
-        <div class="flex-1 flex flex-col overflow-y-auto bg-white">
+        <div class="flex-1 flex flex-col overflow-y-auto bg-gray-50">
             {{-- Header --}}
-            <header class="bg-white border-b border-gray-100 flex items-center justify-end px-8 py-6">
+            <header class="bg-white border-b border-gray-100 flex items-center justify-end px-8 py-4">
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center text-gray-600 focus:outline-none">
-                        <span class="mr-2">{{ Auth::user()->name }}</span>
-                        <i class="fas fa-chevron-down w-3 h-3"></i>
+                        <span class="mr-3">{{ Auth::user()->username }}</span>
+                        <img class="h-10 w-10 rounded-full object-cover" src="{{ Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : 'https://placehold.co/32x32/EFEFEF/333333?text=' . substr(Auth::user()->name, 0, 1) }}" alt="{{ Auth::user()->name }}">
                     </button>
 
                     <div x-show="open" @click.away="open = false" x-cloak
@@ -128,6 +134,11 @@
                 @if (session('success'))
                     <div class="bg-green-100 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded mb-4" role="alert">
                         <p>{{ session('success') }}</p>
+                    </div>
+                @endif
+                 @if (session('error'))
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+                        <p>{{ session('error') }}</p>
                     </div>
                 @endif
 

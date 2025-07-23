@@ -14,6 +14,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\User\PostController as UserPostController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
@@ -32,6 +33,8 @@ Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-z]{2}']], function
 
 Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('users', UserController::class);
 
     // LANGUAGES
     Route::get('languages', [LanguageController::class, 'index'])->name('languages.index');

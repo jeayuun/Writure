@@ -2,11 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Models\User; // Use the User model
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\File;
 
 class DummyContentSeeder extends Seeder
 {
@@ -31,6 +34,12 @@ class DummyContentSeeder extends Seeder
         DB::table('users')->truncate();
         DB::table('languages')->truncate();
         
+        // Clean up storage directories before seeding
+        Storage::disk('public')->deleteDirectory('profile-photos');
+        Storage::disk('public')->deleteDirectory('post-covers');
+        Storage::disk('public')->makeDirectory('profile-photos');
+        Storage::disk('public')->makeDirectory('post-covers');
+
         // --- 1. Languages ---
         DB::table('languages')->insert([
             ['id' => 1, 'name' => 'English', 'slug' => 'en', 'flag' => 'gb', 'status' => 1, 'is_default' => 1, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
@@ -40,27 +49,33 @@ class DummyContentSeeder extends Seeder
         ]);
 
         // --- 2. Users ---
-        DB::table('users')->insert([
-            [
-                'id' => 1,
-                'name' => 'Admin User',
-                'email' => 'admin@example.com',
-                'email_verified_at' => Carbon::now(),
-                'password' => Hash::make('password'),
-                'is_admin' => true, // This user is an admin
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
-            ],
-            [
-                'id' => 2,
-                'name' => 'Jane Doe',
-                'email' => 'jane.doe@example.com',
-                'email_verified_at' => Carbon::now(),
-                'password' => Hash::make('password'),
-                'is_admin' => false, // This is a regular user
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
-            ]
+        $adminPhotoPath = null;
+        $sourceImagePath = public_path('profile-photos/me.png'); 
+        if (file_exists($sourceImagePath)) {
+            $adminPhotoPath = Storage::disk('public')->putFile('profile-photos', new File($sourceImagePath));
+        }
+
+        // Using the User model is more robust
+        User::create([
+            'id' => 1,
+            'name' => 'Admin User',
+            'username' => 'admin',
+            'email' => 'admin@wrytte.com',
+            'email_verified_at' => Carbon::now(),
+            'password' => Hash::make('password'),
+            'is_admin' => true,
+            'profile_photo_path' => $adminPhotoPath,
+        ]);
+
+        User::create([
+            'id' => 2,
+            'name' => 'Jane Doe',
+            'username' => 'janedoe',
+            'email' => 'jane.doe@example.com',
+            'email_verified_at' => Carbon::now(),
+            'password' => Hash::make('password'),
+            'is_admin' => false,
+            'profile_photo_path' => null,
         ]);
 
         // --- 3. Categories and Translations ---

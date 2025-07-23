@@ -1,6 +1,6 @@
 @extends('frontend.layouts.app')
 
-@section('title', 'Multiblog')
+@section('title', 'Writure')
 
 @section('meta_tags')
 

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User; // Use the User model for a more robust approach
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -51,13 +52,10 @@ class DummyContentSeeder extends Seeder
         $adminPhotoPath = null;
         $userPhotoPath = null;
 
-        // Process Admin Photo
         $adminSourceImagePath = public_path('profile-photos/me.png');
         if (file_exists($adminSourceImagePath)) {
             $adminPhotoPath = Storage::disk('public')->putFile('profile-photos', new File($adminSourceImagePath));
         }
-
-        // Process Regular User Photo
         $userSourceImagePath = public_path('profile-photos/jeayuun.jpg');
         if (file_exists($userSourceImagePath)) {
             $userPhotoPath = Storage::disk('public')->putFile('profile-photos', new File($userSourceImagePath));
@@ -68,28 +66,37 @@ class DummyContentSeeder extends Seeder
                 'id' => 1,
                 'name' => 'Admin User',
                 'username' => 'admin', 
-                'email' => 'admin@wrytte.com',
-                'email_verified_at' => Carbon::now(),
+                'email' => 'admin@writure.com',
                 'password' => Hash::make('password'),
                 'is_admin' => true,
                 'profile_photo_path' => $adminPhotoPath,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
             ],
             [
                 'id' => 2,
                 'name' => 'Jedidiah Villegas',
                 'username' => 'jeayuun', 
                 'email' => 'villegasjedidiah@gmail.com',
-                'email_verified_at' => Carbon::now(),
                 'password' => Hash::make('password'),
                 'is_admin' => false,
                 'profile_photo_path' => $userPhotoPath, 
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
             ]
         ];
-        DB::table('users')->insert($usersData);
+        
+        // Using the User model to create users is more reliable
+        foreach ($usersData as $userData) {
+            User::create([
+                'id' => $userData['id'],
+                'name' => $userData['name'],
+                'username' => $userData['username'],
+                'email' => $userData['email'],
+                'email_verified_at' => Carbon::now(),
+                'password' => $userData['password'],
+                'is_admin' => $userData['is_admin'],
+                'profile_photo_path' => $userData['profile_photo_path'],
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ]);
+        }
 
         // Create a lookup for author names
         $authors = collect($usersData)->keyBy('id')->map(fn ($user) => $user['name']);

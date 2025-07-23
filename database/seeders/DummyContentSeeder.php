@@ -55,12 +55,11 @@ class DummyContentSeeder extends Seeder
             $adminPhotoPath = Storage::disk('public')->putFile('profile-photos', new File($sourceImagePath));
         }
 
-        // Using the User model is more robust
         User::create([
             'id' => 1,
             'name' => 'Admin User',
             'username' => 'admin',
-            'email' => 'admin@wrytte.com',
+            'email' => 'admin@writure.com',
             'email_verified_at' => Carbon::now(),
             'password' => Hash::make('password'),
             'is_admin' => true,

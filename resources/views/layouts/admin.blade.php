@@ -116,16 +116,21 @@
                     </button>
 
                     <div x-show="open" @click.away="open = false" x-cloak
-                         class="absolute right-0 mt-2 w-48 bg-white text-gray-700 rounded-md shadow-lg z-50">
-                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 hover:bg-gray-100">
-                            {{ __('Profile') }}
-                        </a>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-100">
-                                {{ __('Logout') }}
-                            </button>
-                        </form>
+                         class="absolute right-0 mt-2 w-56 bg-white rounded-md z-50 ring-1 ring-black ring-opacity-5" style="border: 1px solid #898989; padding: 10px;">
+                         <div class="py-1">
+                            <div class="px-4 py-2">
+                                <p class="text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</p>
+                                <p class="text-sm text-gray-500">{{ Auth::user()->email }}</p>
+                            </div>
+                            <div class="border-t border-gray-100"></div>
+                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ __('Profile Settings') }}</a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    {{ __('Log Out') }}
+                                </button>
+                            </form>
+                         </div>
                     </div>
                 </div>
             </header>

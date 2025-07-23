@@ -15,7 +15,7 @@
 
             @if($posts->isEmpty())
                 <div class="text-center py-24">
-                    <p class="text-gray-500 mb-4">Welcome, you haven't written any articles yet.</p>
+                    <p class="text-gray-500 mb-4">Welcome, you haven't written any blogs yet.</p>
                     <a href="{{ route('user.posts.create') }}" class="text-black font-semibold hover:underline">Start Writing</a>
                 </div>
             @else   

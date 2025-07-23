@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
-class UserDashboardController extends \App\Http\Controllers\Frontend\BaseFrontendController
+class UserDashboardController extends Controller
 {
-    /**
-     * Display the user's dashboard.
-     */
-    public function index(): View
+    public function index()
     {
-        return view('user.dashboard');
+        $user = Auth::user();
+        $posts = $user->posts()->latest()->paginate(9);
+
+        return view('user.dashboard', compact('user', 'posts'));
     }
 }

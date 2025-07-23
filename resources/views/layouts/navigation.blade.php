@@ -1,11 +1,11 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" class="bg-white">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 py-4     sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8" style="border-bottom: 1px solid #eaeaea;">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('welcome') }}" class="text-3xl font-serif font-bold">
+                    <a href="{{ route('welcome') }}" class="text-3xl font-serif font-normal">
                        Writure
                     </a>
                 </div>

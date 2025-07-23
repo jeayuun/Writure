@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User; // Use the User model
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -50,32 +49,50 @@ class DummyContentSeeder extends Seeder
 
         // --- 2. Users ---
         $adminPhotoPath = null;
-        $sourceImagePath = public_path('profile-photos/me.png'); 
-        if (file_exists($sourceImagePath)) {
-            $adminPhotoPath = Storage::disk('public')->putFile('profile-photos', new File($sourceImagePath));
+        $userPhotoPath = null;
+
+        // Process Admin Photo
+        $adminSourceImagePath = public_path('profile-photos/me.png');
+        if (file_exists($adminSourceImagePath)) {
+            $adminPhotoPath = Storage::disk('public')->putFile('profile-photos', new File($adminSourceImagePath));
         }
 
-        User::create([
-            'id' => 1,
-            'name' => 'Admin User',
-            'username' => 'admin',
-            'email' => 'admin@writure.com',
-            'email_verified_at' => Carbon::now(),
-            'password' => Hash::make('password'),
-            'is_admin' => true,
-            'profile_photo_path' => $adminPhotoPath,
-        ]);
+        // Process Regular User Photo
+        $userSourceImagePath = public_path('profile-photos/jeayuun.jpg');
+        if (file_exists($userSourceImagePath)) {
+            $userPhotoPath = Storage::disk('public')->putFile('profile-photos', new File($userSourceImagePath));
+        }
 
-        User::create([
-            'id' => 2,
-            'name' => 'Jane Doe',
-            'username' => 'janedoe',
-            'email' => 'jane.doe@example.com',
-            'email_verified_at' => Carbon::now(),
-            'password' => Hash::make('password'),
-            'is_admin' => false,
-            'profile_photo_path' => null,
-        ]);
+        $usersData = [
+            [
+                'id' => 1,
+                'name' => 'Admin User',
+                'username' => 'admin', 
+                'email' => 'admin@wrytte.com',
+                'email_verified_at' => Carbon::now(),
+                'password' => Hash::make('password'),
+                'is_admin' => true,
+                'profile_photo_path' => $adminPhotoPath,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ],
+            [
+                'id' => 2,
+                'name' => 'Jedidiah Villegas',
+                'username' => 'jeayuun', 
+                'email' => 'villegasjedidiah@gmail.com',
+                'email_verified_at' => Carbon::now(),
+                'password' => Hash::make('password'),
+                'is_admin' => false,
+                'profile_photo_path' => $userPhotoPath, 
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ]
+        ];
+        DB::table('users')->insert($usersData);
+
+        // Create a lookup for author names
+        $authors = collect($usersData)->keyBy('id')->map(fn ($user) => $user['name']);
 
         // --- 3. Categories and Translations ---
         DB::table('categories')->insert([
@@ -144,6 +161,7 @@ class DummyContentSeeder extends Seeder
                 'slug' => $slug,
                 'short_description' => 'This is a sample short description for the post titled "' . $postData['title'] . '".',
                 'content' => '<p>This is the full content for the post about ' . $postData['title'] . '. It demonstrates how the blog post would be rendered with rich text formatting. You can expand this with more detailed content as needed.</p>',
+                'author' => $authors[$postData['user_id']], 
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ]);

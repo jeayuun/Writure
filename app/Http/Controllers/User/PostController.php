@@ -3,92 +3,74 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StorePostRequest;
 use App\Models\Category;
+use App\Models\Language;
 use App\Models\Post;
 use App\Models\Tag;
-use App\Helpers\ImageHelper;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
     /**
      * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\View\View
      */
     public function create()
     {
-        $lang = app()->getLocale();
+        // Fetch categories and tags to display on the form
+        $categories = Category::with('translations')->get();
+        $tags = Tag::with('translations')->get();
+        $defaultLanguage = Language::where('is_default', 1)->first();
 
-        // Eager load only the necessary translations
-        $categories = Category::with(['translations' => function ($query) use ($lang) {
-            $query->where('language_slug', $lang);
-        }])->get();
-
-        $tags = Tag::with(['translations' => function ($query) use ($lang) {
-            $query->where('language_slug', $lang);
-        }])->get();
-        
-        // Return the new, correct view for the user
-        return view('user.posts.create', compact('categories', 'tags'));
+        return view('user.posts.create', compact('categories', 'tags', 'defaultLanguage'));
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \App\Http\Requests\StorePostRequest  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StorePostRequest $request)
+    public function store(Request $request)
     {
-        $data = $request->all();
-        $data['user_id'] = Auth::id(); // Assi  gn the post to the logged-in user
+        $defaultLanguage = Language::where('is_default', 1)->first();
 
-        // Handle Cover Image Upload
-        if ($request->hasFile('cover_image')) {
-            $data['cover_image'] = ImageHelper::upload($request->file('cover_image'), 'posts');
-        }
+        $validated = $request->validate([
+            'translations.' . $defaultLanguage->slug . '.title' => 'required|string|max:255',
+            'translations.' . $defaultLanguage->slug . '.content' => 'required|string',
+            'category_id' => 'nullable|exists:categories,id',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
 
-        // Handle Gallery Photos Upload
-        if ($request->hasFile('gallery')) {
-            $galleryPaths = [];
-            foreach ($request->file('gallery') as $image) {
-                $galleryPaths[] = ImageHelper::upload($image, 'posts/gallery');
-            }
-            $data['gallery'] = json_encode($galleryPaths);
-        }
-
-        // By default, user posts can be set to 'pending_review'
-        $data['status'] = 'pending_review';
-
-        // Create and save the post with the prepared data
         $post = new Post();
-        $post->fill($data)->save();
+        $post->user_id = Auth::id();
+        $post->category_id = $request->category_id;
+        $post->status = 'draft'; // Default to draft
 
-        // Handle Category relationship
-        if ($request->has('category_id')) {
-            $post->categories()->sync([$request->input('category_id')]);
+        if ($request->hasFile('cover_image')) {
+            $path = $request->file('cover_image')->store('post-covers', 'public');
+            $post->cover_image = $path;
         }
-        
-        // Handle Tags relationship
+
+        $post->save();
+
+        // Handle the translation for the default language
+        $translationData = $validated['translations'][$defaultLanguage->slug];
+        $post->translations()->create([
+            'language_slug' => $defaultLanguage->slug,
+            'title' => $translationData['title'],
+            'slug' => Str::slug($translationData['title']),
+            'content' => $translationData['content'],
+            'author' => Auth::user()->name,
+            'short_description' => Str::limit(strip_tags($translationData['content']), 150),
+        ]);
+
+        // Attach tags if any were selected
         if ($request->has('tags')) {
-            $post->tags()->sync($request->input('tags'));
+            $post->tags()->attach($request->tags);
         }
 
-        // Handle Translations
-        if ($request->has('translations')) {
-            foreach ($request->translations as $lang => $translationData) {
-                // Ensure translation data is not empty before creating
-                if (!empty($translationData['title'])) {
-                    $post->translations()->create(
-                        $translationData + ['language_slug' => $lang]
-                    );
-                }
-            }
-        }
-
-        // After saving, redirect the user back to their dashboard with a success message.
-        return redirect()->route('user.dashboard')->with('success', 'Post submitted for review successfully!');
+        return redirect()->route('user.profile', ['username' => Auth::user()->username])
+                         ->with('success', 'Post created successfully! It is currently a draft.');
     }
 }

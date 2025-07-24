@@ -23,7 +23,7 @@
                     @foreach($posts as $post)
                         <div class="bg-white rounded-lg overflow-hidden flex flex-col group">
                             @if($post->cover_image)
-                                <a href="#">
+                                <a href="{{ route('frontend.post.show', [app()->getLocale(), $post->translations->first()->slug]) }}">
                                     <img src="{{ asset($post->cover_image) }}" alt="{{ $post->translations->first()->title ?? '' }}" class="w-full h-56 object-cover">
                                 </a>
                             @endif

@@ -19,15 +19,12 @@ class PostController extends BaseFrontendController
 
         if ($lang) {
             $this->validateLanguage($lang);
-            $currentLanguage = $languages->firstWhere('slug', $lang);
-        } else {
-            $currentLanguage = null;
         }
 
         $translation = PostTranslation::where('slug', $slug)
             ->where('language_slug', $lang)
             ->with([
-                'post',
+                'post.user',
                 'post.category.translations' => function ($q) use ($lang) {
                     $q->where('language_slug', $lang);
                 },
@@ -36,8 +33,39 @@ class PostController extends BaseFrontendController
                 },
             ])
             ->firstOrFail();
-        return view('frontend.post', [
-            'translation' => $translation
-        ]);
+
+        $morePosts = Post::where('user_id', $translation->post->user_id)
+            ->where('id', '!=', $translation->post_id) 
+            ->where('status', 'published')
+            ->with(['translations' => function ($query) use ($lang) {
+                $query->where('language_slug', $lang);
+            }, 'user'])
+            ->latest()
+            ->take(3)
+            ->get();
+
+        return view('frontend.post', compact('translation', 'morePosts'));
+    }
+
+    public function getPostsByCategory($lang, $slug)
+    {
+        $this->validateLanguage($lang);
+
+        $category = Category::where('slug', $slug)->firstOrFail();
+
+        $posts = Post::whereHas('translations', function ($query) use ($lang) {
+            $query->where('language_slug', $lang);
+        })
+            ->where('status', 'published')
+            ->whereHas('category', function ($query) use ($category) {
+                $query->where('id', $category->id);
+            })
+            ->with(['translations' => function ($query) use ($lang) {
+                $query->where('language_slug', $lang);
+            }, 'user'])
+            ->latest()
+            ->paginate(10);
+
+        return view('frontend.category_posts', compact('posts', 'category'));
     }
 }

@@ -59,4 +59,12 @@ class Post extends Model
     {
         return $this->belongsToMany(Category::class, 'post_category');
     }
+
+    /**
+     * Get the user that owns the post.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

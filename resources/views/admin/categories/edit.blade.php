@@ -2,57 +2,70 @@
 
 @section('content')
     <div class="bg-white p-8 rounded-lg shadow-sm">
-        <h1 class="text-2xl font-normal text-gray-800 mb-6">{{ __('Edit Category') }}</h1>
+        <h1 class="text-2xl font-semibold font-serif text-gray-800 mb-6">{{ __('Edit Category') }}</h1>
 
-        {{-- The form action is corrected to pass the $category model directly. --}}
-        {{-- Laravel will automatically resolve the correct ID for the 'category' parameter. --}}
+        {{-- This block will display validation errors --}}
+        @if ($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                <strong class="font-bold">Oops! Something went wrong.</strong>
+                <ul class="mt-3 list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        {{-- Corrected form action --}}
         <form action="{{ route('categories.update', $category) }}" method="POST">
             @csrf
             @method('PUT')
 
-            <div class="mb-8">
-                {{-- Language Tabs --}}
-                <div x-data="{ activeTab: '{{ $languages->first()->slug }}' }">
-                    <div class="border-b border-gray-200">
-                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                            @foreach ($languages as $language)
-                                <a href="#" @click.prevent="activeTab = '{{ $language->slug }}'"
-                                   :class="{
-                                        'border-black text-gray-900': activeTab === '{{ $language->slug }}',
-                                        'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== '{{ $language->slug }}'
-                                   }"
-                                   class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ease-in-out">
-                                    {{ $language->name }}
-                                </a>
-                            @endforeach
-                        </nav>
-                    </div>
-
-                    {{-- Tab Content --}}
-                    <div class="mt-6">
-                        @foreach ($languages as $language)
-                            @php
-                                // Find the translation for the current language, if it exists.
-                                $translation = $category->translations->where('language_slug', $language->slug)->first();
-                            @endphp
-                            <div x-show="activeTab === '{{ $language->slug }}'" x-cloak>
-                                <div class="mb-4">
-                                    <label for="name_{{ $language->slug }}" class="block text-sm font-medium text-gray-700">
-                                        {{ __('Name') }} ({{ strtoupper($language->slug) }})
-                                    </label>
-                                    <input type="text" name="translations[{{ $language->slug }}][name]" id="name_{{ $language->slug }}"
-                                           value="{{ old('translations.'.$language->slug.'.name', $translation->name ?? '') }}"
-                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm">
-                                    <input type="hidden" name="translations[{{ $language->slug }}][language_slug]" value="{{ $language->slug }}">
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
+            <div class="mb-6 border-b border-gray-200">
+                <nav class="flex space-x-4" aria-label="Tabs">
+                    @foreach($languages as $index => $language)
+                        <button type="button"
+                                class="tab-button {{ $index === 0 ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                                data-target="tab-{{ $language->slug }}">
+                            {{ $language->name }}
+                        </button>
+                    @endforeach
+                </nav>
             </div>
 
-            {{-- Action Buttons --}}
-            <div class="flex justify-end items-center">
+            <div>
+                @foreach($languages as $index => $language)
+                    @php
+                        $translation = $category->translations->where('language_slug', $language->slug)->first();
+                    @endphp
+                    <div id="tab-{{ $language->slug }}" class="tab-content {{ $index === 0 ? 'block' : 'hidden' }} space-y-6">
+                        <div>
+                            <label for="name-{{ $language->slug }}" class="block text-sm font-medium text-gray-700">
+                                {{ __('Category Name') }} ({{ strtoupper($language->slug) }})
+                                @if($language->is_default) <span class="text-red-500">*</span> @endif
+                            </label>
+                            <input type="text" name="name[{{ $language->slug }}]" id="name-{{ $language->slug }}" value="{{ old('name.' . $language->slug, $translation->name ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="seo_title-{{ $language->slug }}" class="block text-sm font-medium text-gray-700">
+                                {{ __('SEO Title') }} ({{ strtoupper($language->slug) }})
+                            </label>
+                            <input type="text" name="seo_title[{{ $language->slug }}]" id="seo_title-{{ $language->slug }}" value="{{ old('seo_title.' . $language->slug, $translation->seo_title ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="seo_description-{{ $language->slug }}" class="block text-sm font-medium text-gray-700">{{ __('SEO Description') }} ({{ strtoupper($language->slug) }})</label>
+                            <textarea name="seo_description[{{ $language->slug }}]" id="seo_description-{{ $language->slug }}" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm">{{ old('seo_description.' . $language->slug, $translation->seo_description ?? '') }}</textarea>
+                        </div>
+                        <div>
+                            <label for="seo_keywords-{{ $language->slug }}" class="block text-sm font-medium text-gray-700">{{ __('SEO Keywords') }} ({{ strtoupper($language->slug) }})</label>
+                            <input type="text" name="seo_keywords[{{ $language->slug }}]" id="seo_keywords-{{ $language->slug }}" value="{{ old('seo_keywords.' . $language->slug, $translation->seo_keywords ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm">
+                            <p class="mt-1 text-xs text-gray-500">Separate keywords with commas.</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="flex justify-end items-center mt-8 border-t border-gray-200 pt-6">
                 <a href="{{ route('categories.index') }}" class="text-gray-600 px-4 py-2 rounded-md mr-2 hover:bg-gray-100 transition">
                     {{ __('Cancel') }}
                 </a>
@@ -62,4 +75,33 @@
             </div>
         </form>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = document.getElementById(tab.dataset.target);
+
+                    tabs.forEach(t => {
+                        t.classList.remove('border-black', 'text-black');
+                        t.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                    });
+                    tabContents.forEach(c => {
+                        c.style.display = 'none';
+                    });
+
+                    tab.classList.add('border-black', 'text-black');
+                    tab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                    if (target) {
+                        target.style.display = 'block';
+                    }
+                });
+            });
+        });
+    </script>
+    @endpush
 @endsection

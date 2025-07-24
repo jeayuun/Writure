@@ -43,10 +43,8 @@ class CategoryController extends Controller
         $defaultLanguageSlug = Language::where('is_default', 1)->value('slug');
 
         $rules = [];
-        // The only required field is the name for the default language.
         $rules["name.{$defaultLanguageSlug}"] = 'required|string|max:255';
 
-        // All other fields, including SEO Title, are optional for all languages.
         foreach ($languages as $language) {
             $slug = $language->slug;
             $rules["seo_title.{$slug}"] = 'nullable|string|max:255';
@@ -66,7 +64,6 @@ class CategoryController extends Controller
                 $slug = $language->slug;
                 $name = $request->input("name.{$slug}");
 
-                // Only create a translation if a name for that language was provided
                 if (!empty($name)) {
                     $category->translations()->create([
                         'language_slug' => $slug,
@@ -105,9 +102,20 @@ class CategoryController extends Controller
         $defaultLanguageSlug = Language::where('is_default', 1)->value('slug');
 
         $rules = [];
+        // The only required field is the name for the default language.
         $rules["name.{$defaultLanguageSlug}"] = 'required|string|max:255';
 
-        $request->validate($rules);
+        // All other fields are optional.
+        foreach ($languages as $language) {
+            $slug = $language->slug;
+            $rules["seo_title.{$slug}"] = 'nullable|string|max:255';
+            $rules["seo_description.{$slug}"] = 'nullable|string';
+            $rules["seo_keywords.{$slug}"] = 'nullable|string';
+        }
+        
+        $request->validate($rules, [
+            "name.{$defaultLanguageSlug}.required" => 'The category name for the default language is required.',
+        ]);
 
         DB::beginTransaction();
         try {
@@ -115,9 +123,10 @@ class CategoryController extends Controller
                 $slug = $language->slug;
                 $name = $request->input("name.{$slug}");
 
+                // If a name is provided, update or create the translation.
                 if (!empty($name)) {
                     $category->translations()->updateOrCreate(
-                        ['language_slug' => $slug],
+                        ['language_slug' => $slug], // Find translation by language
                         [
                             'name' => $name,
                             'slug' => Str::slug($name),
@@ -126,7 +135,9 @@ class CategoryController extends Controller
                             'seo_keywords' => $request->input("seo_keywords.{$slug}"),
                         ]
                     );
-                } else {
+                } 
+                // If a name is NOT provided for a NON-DEFAULT language, delete its translation.
+                elseif ($slug !== $defaultLanguageSlug) {
                     $category->translations()->where('language_slug', $slug)->delete();
                 }
             }

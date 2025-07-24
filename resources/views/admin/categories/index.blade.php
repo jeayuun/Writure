@@ -23,7 +23,6 @@
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">{{ $category->id }}</td>
                             <td class="px-6 py-4 whitespace-nowrap hover:bg-gray-50 transition">
-                                {{-- Use the correct variable name here --}}
                                 @if($category->translations->where('language_slug', $defaultLanguageSlug)->isNotEmpty())
                                     <div class="font-medium text-gray-800">{{ $category->translations->where('language_slug', $defaultLanguageSlug)->first()->name }}</div>
                                 @else
@@ -31,8 +30,8 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('categories.edit', $category->id) }}"  style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500;">{{ __('Edit') }}</a>
-                                <form action="{{ route('categories.destroy', $category->id) }}" method="POST" class="inline-block" onsubmit="return confirm('{{ __('Are you sure you want to delete this item?') }}')">
+                                <a href="{{ route('categories.edit', $category) }}"  style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500;">{{ __('Edit') }}</a>
+                                <form action="{{ route('categories.destroy', $category) }}" method="POST" class="inline-block" onsubmit="return confirm('{{ __('Are you sure you want to delete this item?') }}')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500;">{{ __('Delete') }}</button>

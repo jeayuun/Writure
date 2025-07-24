@@ -9,14 +9,14 @@
                     </div>
                 </div>
                 <div>
-                    <a href="{{ route('user.posts.create') }}" class="border border-gray-800 text-white bg-black px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-black transition text-m">Start Writing</a>
+                    <a href="#" class="border border-gray-800 text-white bg-black px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-black transition text-m">Start Writing</a>
                 </div>
             </div>
 
             @if($posts->isEmpty())
                 <div class="text-center py-24">
                     <p class="text-gray-500 mb-4">Welcome, you haven't written any blogs yet.</p>
-                    <a href="{{ route('user.posts.create') }}" class="text-black font-semibold hover:underline">Start Writing</a>
+                    <a href="#" class="text-black font-semibold hover:underline">Start Writing</a>
                 </div>
             @else   
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

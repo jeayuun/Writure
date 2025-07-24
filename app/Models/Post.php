@@ -16,6 +16,7 @@ class Post extends Model
         'is_featured',
         'comment_enabled',
         'status',
+        'cover_image_path',
     ];
 
     protected $casts = [

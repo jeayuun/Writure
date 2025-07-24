@@ -7,12 +7,10 @@
 
         <title>{{ config('app.name', 'Writure') }}</title>
 
-        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
 
-        <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>
              body {
@@ -22,17 +20,16 @@
                 font-family: 'Playfair Display', serif;
             }
         </style>
-    </head>
+        @stack('styles') </head>
     <body class="font-sans antialiased bg-white">
         <div class="min-h-screen flex flex-col">
             @include('layouts.navigation')
 
-            <!-- Page Content -->
             <main class="flex-grow">
                 {{ $slot }}
             </main>
 
-            <!-- Footer -->
+            @if (!request()->routeIs('user.post.create'))
             <footer class="bg-black text-white">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-24">
@@ -44,6 +41,7 @@
                     </div>
                 </div>
             </footer>
+            @endif
         </div>
-    </body>
+        @stack('scripts') </body>
 </html>

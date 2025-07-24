@@ -23,11 +23,12 @@
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">{{ $category->id }}</td>
                             <td class="px-6 py-4 whitespace-nowrap hover:bg-gray-50 transition">
-                                @foreach($category->translations as $trans)
-                                    @if($trans->language_slug === $langSlug)
-                                        <div class="font-medium text-gray-800">{{ $trans->name }}</div>
-                                    @endif
-                                @endforeach
+                                {{-- Use the correct variable name here --}}
+                                @if($category->translations->where('language_slug', $defaultLanguageSlug)->isNotEmpty())
+                                    <div class="font-medium text-gray-800">{{ $category->translations->where('language_slug', $defaultLanguageSlug)->first()->name }}</div>
+                                @else
+                                    <div class="text-sm text-gray-500">({{ __('No translation in default language') }})</div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <a href="{{ route('categories.edit', $category->id) }}"  style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500;">{{ __('Edit') }}</a>

@@ -5,98 +5,149 @@ namespace App\Http\Controllers\Blog;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Language;
-use App\Traits\LanguageValidator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
-    use LanguageValidator;
-
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $defaultLanguage = Language::where('is_default', 1)->first();
-        $langSlug = $defaultLanguage ? $defaultLanguage->slug : 'en';
+        $defaultLanguageSlug = Language::where('is_default', 1)->value('slug');
+        
+        $categories = Category::with(['translations' => function ($query) use ($defaultLanguageSlug) {
+            $query->where('language_slug', $defaultLanguageSlug);
+        }])->latest()->paginate(10);
 
-        $categories = Category::with(['translations' => function ($query) use ($langSlug) {
-            $query->where('language_slug', $langSlug);
-        }])->paginate(10);
-
-        return view('admin.categories.index', compact('categories', 'langSlug'));
+        return view('admin.categories.index', compact('categories', 'defaultLanguageSlug'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
         $languages = Language::all();
         return view('admin.categories.create', compact('languages'));
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'translations' => 'required|array',
-            'translations.*.name' => 'required|string|max:255',
-            'translations.*.language_slug' => 'required|string|exists:languages,slug',
+        $languages = Language::all();
+        $defaultLanguageSlug = Language::where('is_default', 1)->value('slug');
+
+        $rules = [];
+        // The only required field is the name for the default language.
+        $rules["name.{$defaultLanguageSlug}"] = 'required|string|max:255';
+
+        // All other fields, including SEO Title, are optional for all languages.
+        foreach ($languages as $language) {
+            $slug = $language->slug;
+            $rules["seo_title.{$slug}"] = 'nullable|string|max:255';
+            $rules["seo_description.{$slug}"] = 'nullable|string';
+            $rules["seo_keywords.{$slug}"] = 'nullable|string';
+        }
+        
+        $request->validate($rules, [
+            "name.{$defaultLanguageSlug}.required" => 'The category name for the default language is required.',
         ]);
 
-        $category = Category::create();
+        DB::beginTransaction();
+        try {
+            $category = Category::create();
 
-        foreach ($validated['translations'] as $transData) {
-            $category->translations()->create([
-                'language_slug' => $transData['language_slug'],
-                'name' => $transData['name'],
-                'slug' => Str::slug($transData['name']),
-            ]);
+            foreach ($languages as $language) {
+                $slug = $language->slug;
+                $name = $request->input("name.{$slug}");
+
+                // Only create a translation if a name for that language was provided
+                if (!empty($name)) {
+                    $category->translations()->create([
+                        'language_slug' => $slug,
+                        'name' => $name,
+                        'slug' => Str::slug($name),
+                        'seo_title' => $request->input("seo_title.{$slug}"),
+                        'seo_description' => $request->input("seo_description.{$slug}"),
+                        'seo_keywords' => $request->input("seo_keywords.{$slug}"),
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
         }
-
-        return redirect()->route('categories.index')->with('success', 'Category created successfully.');
     }
 
     /**
      * Show the form for editing the specified resource.
-     * The method now accepts an $id parameter.
      */
-    public function edit($id)
+    public function edit(Category $category)
     {
-        $category = Category::findOrFail($id); // Find the category by its ID
         $languages = Language::all();
-        $category->load('translations');
         return view('admin.categories.edit', compact('category', 'languages'));
     }
 
     /**
      * Update the specified resource in storage.
-     * The method now accepts an $id parameter.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Category $category)
     {
-        $category = Category::findOrFail($id); // Find the category by its ID
+        $languages = Language::all();
+        $defaultLanguageSlug = Language::where('is_default', 1)->value('slug');
 
-        $validated = $request->validate([
-            'translations' => 'required|array',
-            'translations.*.name' => 'required|string|max:255',
-            'translations.*.language_slug' => 'required|string|exists:languages,slug',
-        ]);
+        $rules = [];
+        $rules["name.{$defaultLanguageSlug}"] = 'required|string|max:255';
 
-        foreach ($validated['translations'] as $transData) {
-            $category->translations()->updateOrCreate(
-                ['language_slug' => $transData['language_slug']],
-                [
-                    'name' => $transData['name'],
-                    'slug' => Str::slug($transData['name']),
-                ]
-            );
+        $request->validate($rules);
+
+        DB::beginTransaction();
+        try {
+            foreach ($languages as $language) {
+                $slug = $language->slug;
+                $name = $request->input("name.{$slug}");
+
+                if (!empty($name)) {
+                    $category->translations()->updateOrCreate(
+                        ['language_slug' => $slug],
+                        [
+                            'name' => $name,
+                            'slug' => Str::slug($name),
+                            'seo_title' => $request->input("seo_title.{$slug}"),
+                            'seo_description' => $request->input("seo_description.{$slug}"),
+                            'seo_keywords' => $request->input("seo_keywords.{$slug}"),
+                        ]
+                    );
+                } else {
+                    $category->translations()->where('language_slug', $slug)->delete();
+                }
+            }
+            DB::commit();
+            return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
         }
-
-        return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Category $category)
     {
-        $category = Category::findOrFail($id);
-        $category->translations()->delete();
-        $category->delete();
-
-        return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
+        try {
+            $category->delete();
+            return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'An error occurred: ' . $e->getMessage());
+        }
     }
 }

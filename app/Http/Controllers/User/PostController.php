@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -59,6 +61,70 @@ class PostController extends Controller
             return redirect()->route('user.dashboard')->with('success', 'Post created successfully!');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
+            return back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    public function edit(Post $post)
+    {
+        if (Auth::id() !== $post->user_id) {
+            abort(403);
+        }
+
+        $translation = $post->translations->first();
+
+        return view('user.posts.edit', compact('post', 'translation'));
+    }
+
+    public function update(Request $request, Post $post)
+    {
+        if (Auth::id() !== $post->user_id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            if ($request->hasFile('cover_image')) {
+                if ($post->cover_image && file_exists(public_path($post->cover_image))) {
+                    @unlink(public_path($post->cover_image));
+                }
+
+                $file = $request->file('cover_image');
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $uniqueFullPath = generateUniqueFilePath(public_path('uploads/posts'), $originalName, 'webp');
+                $relativePath = str_replace(public_path() . DIRECTORY_SEPARATOR, '', $uniqueFullPath);
+                convertToWebP($file, $relativePath);
+
+                $post->cover_image = $relativePath;
+            } elseif ($request->input('remove_cover_image') == '1') {
+                if ($post->cover_image && file_exists(public_path($post->cover_image))) {
+                    @unlink(public_path($post->cover_image));
+                }
+                $post->cover_image = null;
+            }
+
+            $post->save();
+
+            $translation = $post->translations->first();
+            if ($translation) {
+                $translation->title = $request->title;
+                $translation->content = $request->get('content');
+                $translation->slug = Str::slug($request->title);
+                $translation->save();
+            }
+
+            DB::commit();
+
+            return redirect()->route('user.dashboard')->with('success', 'Post updated successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
             return back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
         }
     }

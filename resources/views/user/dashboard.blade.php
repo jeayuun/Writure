@@ -33,7 +33,7 @@
                                     <p class="text-gray-600 text-sm">{{ $post->translations->first()->short_description ?? '' }}</p>
                                 </div>
                                 <div class="mt-6 flex justify-end space-x-2">
-                                     <a href="#" class="transition" style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500;">Edit</a>
+                                     <a href="{{ route('user.posts.edit', $post) }}" class="transition" style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500;">Edit</a>
                                      <form action="{{ route('user.posts.destroy', $post) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
                                         @csrf
                                         @method('DELETE')

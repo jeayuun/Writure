@@ -29,7 +29,7 @@
                 {{ $slot }}
             </main>
 
-            @if (!request()->routeIs('user.post.create'))
+            @if (!request()->routeIs('user.posts.create', 'user.posts.edit'))
             <footer class="bg-black text-white">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-24">

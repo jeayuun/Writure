@@ -98,6 +98,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
     Route::get('/post/create', [UserPostController::class, 'create'])->name('user.post.create');
     Route::post('/post', [UserPostController::class, 'store'])->name('user.post.store');
+    Route::get('/posts/{post}/edit', [UserPostController::class, 'edit'])->name('user.posts.edit');
+    Route::put('/posts/{post}', [UserPostController::class, 'update'])->name('user.posts.update');
     Route::delete('/posts/{post}', [UserPostController::class, 'destroy'])->name('user.posts.destroy');
     
 });

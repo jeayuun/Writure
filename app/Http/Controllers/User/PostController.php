@@ -27,13 +27,19 @@ class PostController extends Controller
         try {
             $post = new \App\Models\Post([
                 'user_id' => \Illuminate\Support\Facades\Auth::id(),
-                'title' => $request->title,
                 'status' => 'draft', 
             ]);
 
             if ($request->hasFile('cover_image')) {
-                $path = $request->file('cover_image')->store('posts', 'uploads');
-                $post->cover_image_path = $path;
+                $file = $request->file('cover_image');
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+                $uniqueFullPath = generateUniqueFilePath(public_path('uploads/posts'), $originalName, 'webp');
+                $relativePath = str_replace(public_path() . DIRECTORY_SEPARATOR, '', $uniqueFullPath);
+
+                convertToWebP($file, $relativePath);
+
+                $post->cover_image = $relativePath;
             }
 
             $post->save();

@@ -89,14 +89,14 @@
 
                 {{-- Author Box & Sharing --}}
                 <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 border-t pt-8">
-                    <div class="border rounded-lg p-4">
+                    <div class="border border-gray-200 rounded-lg p-4">
                         <h3 class="text-xs uppercase font-semibold text-gray-500 mb-3">About The Author</h3>
-                        <div class="flex items-center space-x-3">
-                             <img class="h-12 w-12 rounded-full object-cover" 
-                                 src="{{ $translation->post->user->profile_photo_path ? asset('storage/' . $translation->post->user->profile_photo_path) : 'https://placehold.co/256x256/EFEFEF/333333?text=' . substr($translation->post->user->name, 0, 1) }}" 
-                                 alt="{{ $translation->post->user->name }}">
-                            <p class="font-semibold text-gray-800">{{ $translation->post->user->name }}</p>
-                        </div>
+                        <a href="{{ route('frontend.author.show', $translation->post->user->username) }}" class="flex items-center space-x-3 group">
+                            <img class="h-12 w-12 rounded-full object-cover group-hover:opacity-90 transition" 
+                                src="{{ $translation->post->user->profile_photo_path ? asset('storage/' . $translation->post->user->profile_photo_path) : 'https://placehold.co/256x256/EFEFEF/333333?text=' . substr($translation->post->user->name, 0, 1) }}" 
+                                alt="{{ $translation->post->user->name }}">
+                            <p class="font-semibold text-gray-800 group-hover:underline">{{ $translation->post->user->name }}</p>
+                        </a>
                     </div>
                     <div class="border rounded-lg p-4">
                         <h3 class="text-xs uppercase font-semibold text-gray-500 mb-3">Share This Article</h3>
@@ -136,8 +136,4 @@
             @endif
         </div>
     </div>
-
-    @push('scripts')
-        <script src="https://kit.fontawesome.com/your-font-awesome-kit-id.js" crossorigin="anonymous"></script>
-    @endpush
 @endsection

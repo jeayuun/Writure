@@ -10,6 +10,7 @@ use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\LanguageChangeController;
 use App\Http\Controllers\Frontend\PostController as FrontendPostController;
 use App\Http\Controllers\Frontend\TagController as FrontendTagController;
+use App\Http\Controllers\Frontend\AuthorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\UserDashboardController;
@@ -30,6 +31,8 @@ Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-z]{2}']], function
     Route::get('/category/{slug}', [FrontendCategoryController::class, 'show'])->name('frontend.category');
     Route::get('/tag/{slug}', [FrontendTagController::class, 'show'])->name('frontend.tag');
 });
+
+Route::get('/@{username}', [AuthorController::class, 'show'])->name('frontend.author.show');
 
 Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');

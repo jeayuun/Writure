@@ -21,16 +21,19 @@ class WelcomeController extends Controller
         $posts = Post::query()
             ->select([
                 'id',
+                'user_id',
                 'category_id',
                 'order',
                 'cover_image',
-                'status'
+                'status',
+                'created_at'
             ])
             ->where('status', 'published')
             ->whereHas('translations', function ($q) use ($langSlug) {
                 $q->where('language_slug', $langSlug);
             })
             ->with([
+                'user',
                 'translations' => fn($q) => $q->where('language_slug', $langSlug),
                 'category' => fn($q) => $q
                     ->select(['id'])

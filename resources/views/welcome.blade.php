@@ -43,15 +43,32 @@
                 <h2 class="text-2xl font-serif font-normal mb-10">Featured Blogs</h2>
                 <div class="grid md:grid-cols-3 gap-10">
                     @forelse($posts as $post)
-                        <div class="bg-white rounded-lg overflow-hidden group">
+                        {{-- Added `flex flex-col` to make the card a flex container --}}
+                        <div class="bg-white rounded-lg overflow-hidden group flex flex-col">
                             @if($post->cover_image)
-                            <a href="#">
+                            <a href="{{ route('frontend.post.show', [app()->getLocale(), $post->translations->first()->slug]) }}">
                                 <img src="{{ asset($post->cover_image) }}" alt="{{ $post->translations->first()->title ?? '' }}" class="w-full h-56 object-cover transform group-hover:scale-105 transition-transform duration-300">
                             </a>
                             @endif
-                            <div class="p-4">
-                                <h3 class="font-normal text-    xl mb-3">{{ $post->translations->first()->title ?? '' }}</h3>
-                                <p class="text-gray-500 text-base font-light line-clamp-3">{{ $post->translations->first()->short_description ?? '' }}</p>
+                            {{-- Added `flex flex-col flex-grow` to make this section fill available space --}}
+                            <div class="p-4 flex flex-col flex-grow">
+                                {{-- Set a fixed height and line-clamp for the title --}}
+                                <h3 class="font-normal text-xl mb-3 h-14 line-clamp-2">{{ $post->translations->first()->title ?? '' }}</h3>
+                                
+                                {{-- Short Description --}}
+                                <p class="text-gray-500 text-base font-light line-clamp-3 mb-4">
+                                    {{ $post->translations->first()->short_description ?? '' }}
+                                </p>
+
+                                {{-- Added `mt-auto` to push this to the bottom of the card --}}
+                                <div class="mt-auto pt-4 border-t border-gray-100 flex items-center text-sm text-gray-500">
+                                     @if($post->user)
+                                        <img class="h-8 w-8 rounded-full object-cover mr-3" 
+                                             src="{{ $post->user->profile_photo_path ? asset('storage/' . $post->user->profile_photo_path) : 'https://placehold.co/256x256/EFEFEF/333333?text=' . substr($post->user->name, 0, 1) }}" 
+                                             alt="{{ $post->user->name }}">
+                                        <span>{{ $post->user->name }} &middot; {{ $post->created_at->format('M d, Y') }}</span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     @empty

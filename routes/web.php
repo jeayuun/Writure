@@ -34,7 +34,7 @@ Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-z]{2}']], function
 
 Route::get('/@{username}', [AuthorController::class, 'show'])->name('frontend.author.show');
 
-Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('admin')->middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('users', UserController::class);

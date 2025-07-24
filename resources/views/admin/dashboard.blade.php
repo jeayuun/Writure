@@ -2,9 +2,15 @@
 
 @section('content')
     <div class="space-y-8">
-        <div>
-            <h1 class="text-3xl font-serif font-semibold text-gray-800">{{ __('Welcome back,') }} {{ Auth::user()->name }}!</h1>
-            <p class="text-gray-500 mt-1">Here's a snapshot of Writure today.</p>
+        {{-- Updated Welcome Header with Profile Photo --}}
+        <div class="flex items-center space-x-6">
+            <img class="h-20 w-20 rounded-full object-cover" 
+                 src="{{ Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : 'https://placehold.co/256x256/EFEFEF/333333?text=' . substr(Auth::user()->name, 0, 1) }}" 
+                 alt="{{ Auth::user()->name }}">
+            <div>
+                <h1 class="text-3xl font-serif font-semibold text-gray-800">{{ __('Welcome back,') }} {{ Auth::user()->name }}!</h1>
+                <p class="text-gray-500 mt-1">Here's a snapshot of Writure today.</p>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -55,7 +61,6 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Recent Posts Column -->
             <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4 ">Recent Posts</h2>
                 <div>
@@ -73,7 +78,6 @@
                 </div>
             </div>
 
-            <!-- Quick Actions Column -->
             <div class="bg-white p-6 rounded-lg shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
                 <div class="space-y-3">

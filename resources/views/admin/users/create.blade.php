@@ -32,7 +32,7 @@
                     <input type="file" name="profile_photo_path" id="profile_photo_path" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
                 </div>
                 <div class="flex items-center">
-                    <input type="hidden" name="is_admin" value="0">
+                    {{-- Removed the hidden input --}}
                     <input id="is_admin" name="is_admin" type="checkbox" value="1" class="h-4 w-4 text-black rounded border-gray-300 focus:ring-black">
                     <label for="is_admin" class="ml-2 block text-sm text-gray-900">{{ __('Assign as Administrator') }}</label>
                 </div>

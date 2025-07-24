@@ -40,8 +40,7 @@ class UserController extends Controller
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::defaults()],
-            'is_admin' => ['boolean'],
-            'profile_photo_path' => ['nullable', 'image', 'max:1024'], // 1MB Max
+            'profile_photo_path' => ['nullable', 'image', 'max:1024'],
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -75,8 +74,7 @@ class UserController extends Controller
             'username' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => ['nullable', 'confirmed', Password::defaults()],
-            'is_admin' => ['boolean'],
-            'profile_photo_path' => ['nullable', 'image', 'max:1024'], // 1MB Max
+            'profile_photo_path' => ['nullable', 'image', 'max:1024'],
         ]);
 
         $validated['is_admin'] = $request->has('is_admin');
@@ -88,7 +86,6 @@ class UserController extends Controller
         }
 
         if ($request->hasFile('profile_photo_path')) {
-            // Delete old photo if it exists
             if ($user->profile_photo_path) {
                 Storage::disk('public')->delete($user->profile_photo_path);
             }

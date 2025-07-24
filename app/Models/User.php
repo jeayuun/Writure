@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -22,8 +21,8 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
-        'profile_photo_path',
         'is_admin',
+        'profile_photo_path',
     ];
 
     /**
@@ -46,14 +45,14 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_admin' => 'boolean',
+            'is_admin' => 'boolean', 
         ];
     }
-
+    
     /**
      * Get the posts for the user.
      */
-    public function posts(): HasMany
+    public function posts()
     {
         return $this->hasMany(Post::class);
     }

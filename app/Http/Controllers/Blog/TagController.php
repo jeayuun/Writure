@@ -3,108 +3,112 @@
 namespace App\Http\Controllers\Blog;
 
 use App\Http\Controllers\Controller;
-use App\Models\Language;
 use App\Models\Tag;
+use App\Models\Language;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class TagController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $defaultLanguage = Language::where('is_default', 1)->first();
-        $langSlug = $defaultLanguage ? $defaultLanguage->slug : 'en';
-
-        // Use paginate() instead of get() to enable pagination
-        $tags = Tag::with(['translations' => function ($query) use ($langSlug) {
-            $query->where('language_slug', $langSlug);
-        }])->paginate(10); // Adjust items per page as needed
-
-        return view('admin.tags.index', compact('tags', 'langSlug'));
+        $defaultLanguageSlug = Language::where('is_default', 1)->value('slug');
+        $tags = Tag::with(['translations' => fn($q) => $q->where('language_slug', $defaultLanguageSlug)])->latest()->paginate(10);
+        return view('admin.tags.index', compact('tags', 'defaultLanguageSlug'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $languages = Language::all();
         return view('admin.tags.create', compact('languages'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'translations' => 'required|array',
-            'translations.*.name' => 'required|string|max:255',
-            'translations.*.language_slug' => 'required|string|exists:languages,slug',
+        $languages = Language::all();
+        $defaultLanguageSlug = Language::where('is_default', 1)->value('slug');
+
+        $rules["name.{$defaultLanguageSlug}"] = 'required|string|max:255';
+        $request->validate($rules, [
+            "name.{$defaultLanguageSlug}.required" => 'The tag name for the default language is required.',
         ]);
 
-        $tag = Tag::create();
-
-        foreach ($validated['translations'] as $transData) {
-            $tag->translations()->create([
-                'language_slug' => $transData['language_slug'],
-                'name' => $transData['name'],
-                'slug' => Str::slug($transData['name']),
-            ]);
+        DB::beginTransaction();
+        try {
+            $tag = Tag::create();
+            foreach ($languages as $language) {
+                $slug = $language->slug;
+                if (!empty($request->input("name.{$slug}"))) {
+                    $tag->translations()->create([
+                        'language_slug' => $slug,
+                        'name' => $request->input("name.{$slug}"),
+                        'slug' => Str::slug($request->input("name.{$slug}")),
+                        'seo_title' => $request->input("seo_title.{$slug}"),
+                        'seo_description' => $request->input("seo_description.{$slug}"),
+                        'seo_keywords' => $request->input("seo_keywords.{$slug}"),
+                    ]);
+                }
+            }
+            DB::commit();
+            return redirect()->route('tags.index')->with('success', 'Tag created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
         }
-
-        return redirect()->route('tags.index')->with('success', 'Tag created successfully.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function edit(Tag $tag)
     {
-        $tag = Tag::findOrFail($id);
         $languages = Language::all();
-        $tag->load('translations');
         return view('admin.tags.edit', compact('tag', 'languages'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, Tag $tag)
     {
-        $tag = Tag::findOrFail($id);
+        $languages = Language::all();
+        $defaultLanguageSlug = Language::where('is_default', 1)->value('slug');
 
-        $validated = $request->validate([
-            'translations' => 'required|array',
-            'translations.*.name' => 'required|string|max:255',
-            'translations.*.language_slug' => 'required|string|exists:languages,slug',
+        $rules["name.{$defaultLanguageSlug}"] = 'required|string|max:255';
+        $request->validate($rules, [
+            "name.{$defaultLanguageSlug}.required" => 'The tag name for the default language is required.',
         ]);
 
-        foreach ($validated['translations'] as $transData) {
-            $tag->translations()->updateOrCreate(
-                ['language_slug' => $transData['language_slug']],
-                [
-                    'name' => $transData['name'],
-                    'slug' => Str::slug($transData['name']),
-                ]
-            );
+        DB::beginTransaction();
+        try {
+            foreach ($languages as $language) {
+                $slug = $language->slug;
+                $name = $request->input("name.{$slug}");
+                if (!empty($name)) {
+                    $tag->translations()->updateOrCreate(
+                        ['language_slug' => $slug],
+                        [
+                            'name' => $name,
+                            'slug' => Str::slug($name),
+                            'seo_title' => $request->input("seo_title.{$slug}"),
+                            'seo_description' => $request->input("seo_description.{$slug}"),
+                            'seo_keywords' => $request->input("seo_keywords.{$slug}"),
+                        ]
+                    );
+                } elseif ($slug !== $defaultLanguageSlug) {
+                    $tag->translations()->where('language_slug', $slug)->delete();
+                }
+            }
+            DB::commit();
+            return redirect()->route('tags.index')->with('success', 'Tag updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
         }
-
-        return redirect()->route('tags.index')->with('success', 'Tag updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
+    public function destroy(Tag $tag)
     {
-        $tag = Tag::findOrFail($id);
-        $tag->translations()->delete();
-        $tag->delete();
-
-        return redirect()->route('tags.index')->with('success', 'Tag deleted successfully.');
+        try {
+            $tag->delete();
+            return redirect()->route('tags.index')->with('success', 'Tag deleted successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'An error occurred: ' . $e->getMessage());
+        }
     }
 }

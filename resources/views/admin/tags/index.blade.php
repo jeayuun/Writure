@@ -23,18 +23,18 @@
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">{{ $tag->id }}</td>
                             <td class="px-6 py-4 whitespace-nowrap hover:bg-gray-50 transition">
-                                @foreach($tag->translations as $trans)
-                                    @if($trans->language_slug === $langSlug)
-                                        <div class="font-medium text-gray-800">{{ $trans->name }}</div>
-                                    @endif
-                                @endforeach
+                                @if($tag->translations->where('language_slug', $defaultLanguageSlug)->isNotEmpty())
+                                    <div class="font-medium text-gray-800">{{ $tag->translations->where('language_slug', $defaultLanguageSlug)->first()->name }}</div>
+                                @else
+                                    <div class="text-sm text-gray-500">({{ __('No translation in default language') }})</div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('tags.edit', $tag->id) }}" style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500;">{{ __('Edit') }}</a>
-                                <form action="{{ route('tags.destroy', $tag->id) }}" method="POST" class="inline-block" onsubmit="return confirm('{{ __('Are you sure you want to delete this?') }}')">
+                                <a href="{{ route('tags.edit', $tag) }}"  style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500;">{{ __('Edit') }}</a>
+                                <form action="{{ route('tags.destroy', $tag) }}" method="POST" class="inline-block" onsubmit="return confirm('{{ __('Are you sure you want to delete this item?') }}')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500; cursor: pointer;">{{ __('Delete') }}</button>
+                                    <button type="submit" style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500;">{{ __('Delete') }}</button>
                                 </form>
                             </td>
                         </tr>
@@ -48,7 +48,7 @@
                 </tbody>
             </table>
         </div>
-
+        
         @if ($tags->hasPages())
             <div class="mt-6">
                 {{ $tags->links() }}

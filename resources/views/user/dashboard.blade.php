@@ -34,7 +34,7 @@
                                 </div>
                                 <div class="mt-6 flex justify-end space-x-2">
                                      <a href="#" class="transition" style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500;">Edit</a>
-                                     <form action="#" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                                     <form action="{{ route('user.posts.destroy', $post) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="transition" style="display: inline-block; padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 9999px; color: #374151; background-color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 500;">Delete</button>

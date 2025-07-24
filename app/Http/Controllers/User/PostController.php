@@ -62,4 +62,25 @@ class PostController extends Controller
             return back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
         }
     }
+    
+    public function destroy(Post $post)
+    {
+        if ($post->user_id !== Auth::id()) {
+            return redirect()->route('user.dashboard')->with('error', 'Unauthorized action.');
+        }
+
+        \Illuminate\Support\Facades\DB::beginTransaction();
+
+        try {
+            $post->translations()->delete();
+            $post->delete();
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            return redirect()->route('user.dashboard')->with('success', 'Post deleted successfully!');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return back()->with('error', 'An error occurred: ' . $e->getMessage());
+        }
+    }
 }

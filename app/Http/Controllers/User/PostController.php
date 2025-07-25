@@ -58,7 +58,8 @@ class PostController extends Controller
 
             \Illuminate\Support\Facades\DB::commit();
 
-            return redirect()->route('user.dashboard')->with('success', 'Post created successfully!');
+            // Corrected route name
+            return redirect()->route('dashboard')->with('success', 'Post created successfully!');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
             return back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
@@ -122,7 +123,8 @@ class PostController extends Controller
 
             DB::commit();
 
-            return redirect()->route('user.dashboard')->with('success', 'Post updated successfully!');
+            // Corrected route name
+            return redirect()->route('dashboard')->with('success', 'Post updated successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
@@ -132,7 +134,8 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         if ($post->user_id !== Auth::id()) {
-            return redirect()->route('user.dashboard')->with('error', 'Unauthorized action.');
+            // Corrected route name
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
 
         \Illuminate\Support\Facades\DB::beginTransaction();
@@ -143,7 +146,8 @@ class PostController extends Controller
 
             \Illuminate\Support\Facades\DB::commit();
 
-            return redirect()->route('user.dashboard')->with('success', 'Post deleted successfully!');
+            // Corrected route name
+            return redirect()->route('dashboard')->with('success', 'Post deleted successfully!');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
             return back()->with('error', 'An error occurred: ' . $e->getMessage());

@@ -23,6 +23,9 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
+    /**
+     * Handle an incoming authentication request.
+     */
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
@@ -31,16 +34,11 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        // Check if the user is an admin
         if ($user->is_admin) {
-            // This line was the fix: redirecting to the named route 'dashboard'
-            return redirect()->route('dashboard'); 
+            return redirect()->route('admin.dashboard'); 
         }
 
-        // This part is for regular users, which we can build next
-        // For now, it will likely cause an error if a non-admin logs in,
-        // but it ensures the admin login works perfectly.
-        return redirect()->intended(route('user.dashboard', [], false));
+        return redirect()->intended(route('dashboard', [], false));
     }
 
     /**

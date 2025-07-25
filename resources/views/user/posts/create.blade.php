@@ -15,7 +15,7 @@
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <form method="POST" action="{{ route('user.post.store') }}" id="post-form" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('user.posts.store') }}" id="post-form" enctype="multipart/form-data">
                 @csrf
                 <div class="flex flex-col space-y-8">
                     <img id="cover-image-preview" src="" alt="Cover image preview" class="rounded-lg mb-4" style="display: none;">
@@ -57,7 +57,7 @@
     <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-end items-center h-20">
-                <a href="{{ route('user.dashboard') }}" class="text-gray-600 px-4 py-2 rounded-md mr-2 hover:bg-gray-100 transition">
+                <a href="{{ route('dashboard') }}" class="text-gray-600 px-4 py-2 rounded-md mr-2 hover:bg-gray-100 transition">
                     Cancel
                 </a>
                 <button type="submit" form="post-form" class="border border-gray-800 text-white bg-black px-8 py-2 rounded-full font-semibold hover:bg-gray-800 transition text-m">

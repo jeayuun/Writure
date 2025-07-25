@@ -54,7 +54,7 @@
             @endphp
 
             <nav class="mt-4 space-y-2">
-                <a href="{{ route('dashboard') }}"
+                <a href="{{ route('admin.dashboard') }}"
                    class="sidebar-link flex items-center px-8 py-3 transition hover:bg-gray-900 hover:text-white {{ $routePrefix == 'dashboard' ? 'active' : '' }}">
                    <i class="fas fa-tachometer-alt w-6 text-center"></i>
                    <span class="ml-4">{{ __('Dashboard') }}</span>
@@ -152,6 +152,9 @@
         </div>
     </div>
     @stack('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/@headlessui/alpine@1.7.14/dist/headlessui.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.13.3/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
 </body>
 
 </html>

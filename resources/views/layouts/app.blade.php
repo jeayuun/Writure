@@ -43,5 +43,9 @@
             </footer>
             @endif
         </div>
-        @stack('scripts') </body>
+        @stack('scripts') 
+        <script src="https://cdn.jsdelivr.net/npm/@headlessui/alpine@1.7.14/dist/headlessui.min.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.13.3/dist/cdn.min.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
+    </body>
 </html>

@@ -74,6 +74,7 @@ class UpdatePostRequest extends FormRequest
     public function rules(): array
     {
         $postId = $this->getPostId();
+        $defaultLangSlug = \App\Models\Language::where('is_default', 1)->value('slug');
 
         $rules = [
             'category_id' => ['nullable', 'exists:categories,id'],
@@ -88,7 +89,13 @@ class UpdatePostRequest extends FormRequest
         ];
 
         foreach ($this->input('translations', []) as $lang => $translation) {
-            $rules["translations.$lang.title"] = ['required', 'string', 'max:255'];
+            $required = ($lang === $defaultLangSlug) ? 'required' : 'nullable';
+
+            if ($required === 'nullable' && empty($translation['title'])) {
+                continue;
+            }
+
+            $rules["translations.$lang.title"] = [$required, 'string', 'max:255'];
             $rules["translations.$lang.slug"] = [
                 'required',
                 'string',

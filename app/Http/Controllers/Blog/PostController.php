@@ -64,14 +64,11 @@ class PostController extends Controller
                 $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
                 $uniqueFullPath = generateUniqueFilePath(public_path('uploads/posts'), $originalName, 'webp');
-
-                // Trim the public_path part to get the relative path like 'uploads/posts/...'
+                
                 $relativePath = str_replace(public_path() . DIRECTORY_SEPARATOR, '', $uniqueFullPath);
 
-                // Convert to WebP format
                 convertToWebP($file, $relativePath);
 
-                // Save the path for the database
                 $post->cover_image = $relativePath;
             }
 
@@ -81,11 +78,9 @@ class PostController extends Controller
                 foreach ($request->file('gallery_images') as $file) {
                     $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                     $uniqueFullPath = generateUniqueFilePath(public_path('uploads/gallery'), $originalName, 'webp');
-
-                    // Get just the subpath from the full path (remove the public_path() part)
+                    
                     $relativePath = str_replace(public_path() . DIRECTORY_SEPARATOR, '', $uniqueFullPath);
-
-                    // Convert to WebP
+                    
                     convertToWebP($file, $relativePath);
 
                     $existingImages[] = $relativePath;
@@ -97,16 +92,18 @@ class PostController extends Controller
             $post->save();
 
             foreach ($request->translations as $lang => $data) {
-                $post->translations()->create([
-                    'language_slug' => $lang,
-                    'title' => $data['title'],
-                    'slug' => $data['slug'],
-                    'short_description' => $data['short_description'] ?? '',
-                    'content' => $data['content'] ?? '',
-                    'seo_title' => $data['seo_title'] ?? null,
-                    'seo_description' => $data['seo_description'] ?? null,
-                    'seo_keywords' => $data['seo_keywords'] ?? null,
-                ]);
+                if (!empty($data['title'])) {
+                    $post->translations()->create([
+                        'language_slug' => $lang,
+                        'title' => $data['title'],
+                        'slug' => $data['slug'],
+                        'short_description' => $data['short_description'] ?? '',
+                        'content' => $data['content'] ?? '',
+                        'seo_title' => $data['seo_title'] ?? null,
+                        'seo_description' => $data['seo_description'] ?? null,
+                        'seo_keywords' => $data['seo_keywords'] ?? null,
+                    ]);
+                }
             }
 
             if ($request->tags) {
@@ -133,36 +130,28 @@ class PostController extends Controller
             $post->comment_enabled = $request->boolean('comment_enabled');
             $post->status = $request->status ?? 'draft';
 
-            // Cover image operations...
             if ($request->hasFile('cover_image')) {
-                // First, delete the old image if it exists
                 if ($post->cover_image && file_exists(public_path($post->cover_image))) {
                     @unlink(public_path($post->cover_image));
                 }
 
                 $file = $request->file('cover_image');
                 $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-
                 $uniqueFullPath = generateUniqueFilePath(public_path('uploads/posts'), $originalName, 'webp');
                 $relativePath = str_replace(public_path() . DIRECTORY_SEPARATOR, '', $uniqueFullPath);
-
                 convertToWebP($file, $relativePath);
 
                 $post->cover_image = $relativePath;
             }
 
-            // Gallery images operations...
             if ($request->hasFile('gallery_images')) {
                 $existingImages = $post->gallery_images ?? [];
 
                 foreach ($request->file('gallery_images') as $file) {
                     $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-
                     $uniqueFullPath = generateUniqueFilePath(public_path('uploads/gallery'), $originalName, 'webp');
                     $relativePath = str_replace(public_path() . DIRECTORY_SEPARATOR, '', $uniqueFullPath);
-
                     convertToWebP($file, $relativePath);
-
                     $existingImages[] = $relativePath;
                 }
 
@@ -171,31 +160,25 @@ class PostController extends Controller
 
             $post->save();
 
-            // Translation operations
-            foreach ($request->translations as $lang => $data) {
-                $translation = $post->translations()->where('language_slug', $lang)->first();
+            $defaultLangSlug = Language::where('is_default', 1)->value('slug');
 
-                if ($translation) {
-                    $translation->update([
-                        'title' => $data['title'],
-                        'slug' => $data['slug'],
-                        'short_description' => $data['short_description'] ?? '',
-                        'content' => $data['content'] ?? '',
-                        'seo_title' => $data['seo_title'] ?? null,
-                        'seo_description' => $data['seo_description'] ?? null,
-                        'seo_keywords' => $data['seo_keywords'] ?? null,
-                    ]);
-                } else {
-                    $post->translations()->create([
-                        'language_slug' => $lang,
-                        'title' => $data['title'],
-                        'slug' => $data['slug'],
-                        'short_description' => $data['short_description'] ?? '',
-                        'content' => $data['content'] ?? '',
-                        'seo_title' => $data['seo_title'] ?? null,
-                        'seo_description' => $data['seo_description'] ?? null,
-                        'seo_keywords' => $data['seo_keywords'] ?? null,
-                    ]);
+            foreach ($request->translations as $lang => $data) {
+                if (!empty($data['title'])) {
+                    $post->translations()->updateOrCreate(
+                        ['language_slug' => $lang],
+                        [
+                            'title' => $data['title'],
+                            'slug' => $data['slug'],
+                            'short_description' => $data['short_description'] ?? '',
+                            'content' => $data['content'] ?? '',
+                            'seo_title' => $data['seo_title'] ?? null,
+                            'seo_description' => $data['seo_description'] ?? null,
+                            'seo_keywords' => $data['seo_keywords'] ?? null,
+                        ]
+                    );
+                } 
+                elseif ($lang !== $defaultLangSlug) {
+                    $post->translations()->where('language_slug', $lang)->delete();
                 }
             }
 
@@ -318,15 +301,12 @@ class PostController extends Controller
         DB::beginTransaction();
         try {
             $translation = PostTranslation::findOrFail($translationId);
-            $post = $translation->post; // Get the post from the translation
+            $post = $translation->post; 
 
-            // First, delete the translation
             $translation->delete();
 
-            // Check the number of remaining translations
             $remainingTranslations = $post->translations()->count();
 
-            // If no translations are left
             if ($remainingTranslations === 0) {
                 $this->deletePostAndAssets($post);
                 

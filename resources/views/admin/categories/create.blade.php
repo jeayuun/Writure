@@ -44,7 +44,6 @@
                         <div>
                             <label for="seo_title-{{ $language->slug }}" class="block text-sm font-medium text-gray-700">
                                 {{ __('SEO Title') }} ({{ strtoupper($language->slug) }})
-                                @if($language->is_default) <span class="text-red-500">*</span> @endif
                             </label>
                             <input type="text" name="seo_title[{{ $language->slug }}]" id="seo_title-{{ $language->slug }}" value="{{ old('seo_title.' . $language->slug) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm">
                         </div>

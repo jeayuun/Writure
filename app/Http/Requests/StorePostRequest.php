@@ -62,6 +62,8 @@ class StorePostRequest extends FormRequest
 
     public function rules(): array
     {
+        $defaultLangSlug = \App\Models\Language::where('is_default', 1)->value('slug');
+
         $rules = [
             'category_id' => ['nullable', 'exists:categories,id'],
             'order' => ['nullable', 'integer'],
@@ -75,9 +77,15 @@ class StorePostRequest extends FormRequest
         ];
 
         foreach ($this->input('translations', []) as $lang => $translation) {
-            $rules["translations.$lang.title"] = ['required', 'string', 'max:255'];
+            $required = ($lang === $defaultLangSlug) ? 'required' : 'nullable';
+
+            if ($required === 'nullable' && empty($translation['title'])) {
+                continue;
+            }
+
+            $rules["translations.$lang.title"] = [$required, 'string', 'max:255'];
             $rules["translations.$lang.slug"] = [
-                'required',
+                $required,
                 'string',
                 'max:255',
                 new UniqueSlugPerLanguage($lang)
